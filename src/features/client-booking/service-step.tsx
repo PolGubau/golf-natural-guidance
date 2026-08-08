@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarDays, Check, Clock3 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { availablePlaces } from "~/domain/booking";
 import type { DemoData } from "~/domain/models";
@@ -28,6 +28,25 @@ export function ServiceStep({ data, draft, onChange }: Props) {
   const activities = data.activities.filter(
     (activity) => activity.active && new Date(activity.endsAt) > new Date(),
   );
+  const detailsRef = useRef<HTMLElement>(null);
+  const selectedTeacher = data.teachers.find(
+    (teacher) => teacher.id === draft.teacherId,
+  );
+  const selectedActivity = activities.find(
+    (activity) => activity.id === draft.activityId,
+  );
+  const revealDetails = (patch: Partial<BookingDraft>) => {
+    onChange(patch);
+    requestAnimationFrame(() => {
+      detailsRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+      detailsRef.current?.focus({ preventScroll: true });
+    });
+  };
   return (
     <div className="space-y-8">
       <section>
@@ -83,7 +102,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
               <span className="text-xs text-muted">50 min · 1–4 jugadores</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {activeTeachers.slice(0, 4).map((teacher) => (
+              {activeTeachers.map((teacher) => (
                 <CatalogCard
                   key={teacher.id}
                   title={`Clase con ${teacher.name}`}
@@ -95,7 +114,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                     draft.mode === "private_lesson"
                   }
                   onClick={() =>
-                    onChange({
+                    revealDetails({
                       mode: "private_lesson",
                       productId: "product-private",
                       teacherId: teacher.id,
@@ -135,7 +154,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                       draft.mode === "group_activity"
                     }
                     onClick={() =>
-                      onChange({
+                      revealDetails({
                         mode: "group_activity",
                         productId: "product-group",
                         activityId: activity.id,
@@ -175,72 +194,62 @@ export function ServiceStep({ data, draft, onChange }: Props) {
           </div>
         ) : null}
       </section>
-      {draft.mode === "private_lesson" ? (
-        <section>
+      {draft.mode === "private_lesson" && selectedTeacher ? (
+        <section
+          ref={detailsRef}
+          tabIndex={-1}
+          className="scroll-mt-5 outline-none"
+          aria-labelledby="private-configuration-title"
+        >
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight">
-                ¿Con quién quieres entrenar?
+              <p className="mb-1 text-xs font-bold uppercase tracking-[.16em] text-coral">
+                Selección realizada
+              </p>
+              <h2
+                id="private-configuration-title"
+                className="text-xl font-semibold tracking-tight"
+              >
+                Completa tu clase
               </h2>
               <p className="mt-1 text-sm text-muted">
-                Todos los precios son datos públicos editables de la demo.
+                Revisa el profesor y ajusta los últimos detalles.
               </p>
             </div>
-            <Badge>{activeTeachers.length} disponibles</Badge>
+            <Badge tone="success">Elegida</Badge>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {activeTeachers.map((teacher) => (
-              <button
-                type="button"
-                key={teacher.id}
-                onClick={() => onChange({ teacherId: teacher.id })}
-                className={cn(
-                  "group relative flex items-center gap-3 rounded-2xl border bg-white p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg",
-                  draft.teacherId === teacher.id
-                    ? "border-forest ring-3 ring-forest/10"
-                    : "border-line",
-                )}
-              >
-                <span
-                  className="size-11 shrink-0 overflow-hidden rounded-full bg-sand"
-                  style={{ backgroundColor: teacher.color }}
-                >
-                  {teacher.photoUrl ? (
-                    <Image
-                      src={teacher.photoUrl}
-                      alt={`Foto de ${teacher.name}`}
-                      width={44}
-                      height={44}
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <span className="grid size-full place-items-center text-sm font-bold text-white">
-                      {initials(teacher.name)}
-                    </span>
-                  )}
+          <div className="relative flex items-center gap-3 rounded-2xl border border-forest/25 bg-forest/[.04] p-4">
+            <span
+              className="size-12 shrink-0 overflow-hidden rounded-full bg-sand"
+              style={{ backgroundColor: selectedTeacher.color }}
+            >
+              {selectedTeacher.photoUrl ? (
+                <Image
+                  src={selectedTeacher.photoUrl}
+                  alt={`Foto de ${selectedTeacher.name}`}
+                  width={48}
+                  height={48}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <span className="grid size-full place-items-center text-sm font-bold text-white">
+                  {initials(selectedTeacher.name)}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold">
-                    {teacher.name}
-                  </span>
-                  <span className="block truncate text-xs text-muted">
-                    {categoryLabels[teacher.category]} · {teacher.publicRole}
-                  </span>
-                </span>
-                <span className="text-right">
-                  <strong className="block">
-                    {formatMoney(teacher.customerPrice)}
-                  </strong>
-                  <span className="text-[11px] text-muted">por sesión</span>
-                </span>
-                {draft.teacherId === teacher.id ? (
-                  <Check
-                    className="absolute top-2 right-2 text-forest"
-                    size={15}
-                  />
-                ) : null}
-              </button>
-            ))}
+              )}
+            </span>
+            <span className="min-w-0 flex-1">
+              <strong className="block truncate">{selectedTeacher.name}</strong>
+              <span className="block truncate text-xs text-muted">
+                {categoryLabels[selectedTeacher.category]} · 50 minutos
+              </span>
+            </span>
+            <span className="pr-5 text-right">
+              <strong className="block">
+                {formatMoney(selectedTeacher.customerPrice)}
+              </strong>
+              <span className="text-[11px] text-muted">por sesión</span>
+            </span>
+            <Check className="absolute top-3 right-3 text-forest" size={15} />
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium">
@@ -279,90 +288,64 @@ export function ServiceStep({ data, draft, onChange }: Props) {
           </div>
         </section>
       ) : null}
-      {draft.mode === "group_activity" ? (
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">
-            Próximas actividades
+      {draft.mode === "group_activity" && selectedActivity ? (
+        <section
+          ref={detailsRef}
+          tabIndex={-1}
+          className="scroll-mt-5 outline-none"
+          aria-labelledby="activity-configuration-title"
+        >
+          <p className="mb-1 text-xs font-bold uppercase tracking-[.16em] text-coral">
+            Selección realizada
+          </p>
+          <h2
+            id="activity-configuration-title"
+            className="text-xl font-semibold tracking-tight"
+          >
+            Completa tu inscripción
           </h2>
           <p className="mt-1 mb-4 text-sm text-muted">
-            Horarios cerrados, grupos reducidos y pago online.
+            Revisa la actividad y confirma tu relación con Arabella.
           </p>
-          <div className="grid gap-3">
-            {activities.map((activity) => {
-              const teacher = data.teachers.find(
-                (item) => item.id === activity.teacherId,
-              );
-              const places = availablePlaces(activity, data.bookings);
-              const selected = draft.activityId === activity.id;
-              return (
-                <button
-                  type="button"
-                  key={activity.id}
-                  disabled={places === 0}
-                  onClick={() =>
-                    onChange({
-                      activityId: activity.id,
-                      teacherId: activity.teacherId,
-                      startsAt: activity.startsAt,
-                      endsAt: activity.endsAt,
-                    })
-                  }
-                  className={cn(
-                    "relative grid gap-4 rounded-2xl border bg-white p-4 text-left transition sm:grid-cols-[1fr_auto] sm:items-center",
-                    selected
-                      ? "border-forest ring-3 ring-forest/10"
-                      : "border-line hover:shadow-lg",
-                    places === 0 && "opacity-55",
-                  )}
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <strong>{activity.name}</strong>
-                      <Badge tone={places <= 2 ? "warning" : "success"}>
-                        {places ? `${places} plazas` : "Completa"}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted">
-                      {activity.description}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-muted">
-                      <span className="flex items-center gap-1.5">
-                        <CalendarDays size={14} />
-                        {formatDate(activity.startsAt, {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock3 size={14} />
-                        {formatTime(activity.startsAt)}–
-                        {formatTime(activity.endsAt)}
-                      </span>
-                      <span>{teacher?.name}</span>
-                    </div>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <strong className="text-lg">
-                      {formatMoney(
-                        draft.memberType === "arabella_member"
-                          ? (activity.memberPrice ?? activity.price)
-                          : activity.price,
-                      )}
-                    </strong>
-                    <span className="block text-[11px] text-muted">
-                      por persona
-                    </span>
-                  </div>
-                  {selected ? (
-                    <Check
-                      className="absolute top-3 right-3 text-forest"
-                      size={16}
-                    />
-                  ) : null}
-                </button>
-              );
-            })}
+          <div className="relative grid gap-4 rounded-2xl border border-forest/25 bg-forest/[.04] p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 pr-6">
+                <strong>{selectedActivity.name}</strong>
+                <Badge tone="success">
+                  {availablePlaces(selectedActivity, data.bookings)} plazas
+                </Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted">
+                {selectedActivity.description}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-muted">
+                <span className="flex items-center gap-1.5">
+                  <CalendarDays size={14} />
+                  {formatDate(selectedActivity.startsAt, {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock3 size={14} />
+                  {formatTime(selectedActivity.startsAt)}–
+                  {formatTime(selectedActivity.endsAt)}
+                </span>
+                <span>{selectedTeacher?.name}</span>
+              </div>
+            </div>
+            <div className="text-left sm:text-right">
+              <strong className="text-lg">
+                {formatMoney(
+                  draft.memberType === "arabella_member"
+                    ? (selectedActivity.memberPrice ?? selectedActivity.price)
+                    : selectedActivity.price,
+                )}
+              </strong>
+              <span className="block text-[11px] text-muted">por persona</span>
+            </div>
+            <Check className="absolute top-3 right-3 text-forest" size={16} />
           </div>
           <label className="mt-5 grid max-w-xs gap-2 text-sm font-medium">
             Relación con Arabella
@@ -410,6 +393,7 @@ function CatalogCard({
       type="button"
       disabled={disabled || muted}
       onClick={onClick}
+      aria-pressed={muted ? undefined : selected}
       className={cn(
         "group relative min-h-24 overflow-hidden rounded-2xl border bg-white p-4 text-left transition",
         selected

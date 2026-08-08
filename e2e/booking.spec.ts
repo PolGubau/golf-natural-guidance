@@ -11,6 +11,22 @@ async function loginAsToni(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
 }
 
+test("mobile selection reveals its configuration and the next step", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/booking");
+  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Completa tu clase" }),
+  ).toBeInViewport();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Encuentra tu mejor momento" }),
+  ).toBeInViewport();
+});
+
 test("private lesson appears in the backoffice", async ({ page }) => {
   await page.goto("/booking");
   await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();

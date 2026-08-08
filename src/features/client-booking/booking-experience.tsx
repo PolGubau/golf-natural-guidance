@@ -7,7 +7,7 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createBooking } from "~/application/create-booking";
 import { Brand } from "~/components/brand";
 import { Button } from "~/components/ui/button";
@@ -46,6 +46,19 @@ export function BookingExperience() {
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  const flowRef = useRef<HTMLElement>(null);
+  const goToStep = (nextStep: number) => {
+    setStep(nextStep);
+    requestAnimationFrame(() => {
+      flowRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+      flowRef.current?.focus({ preventScroll: true });
+    });
+  };
 
   if (status === "loading" || !data) return <LoadingState />;
   if (status === "error") return <ErrorState />;
@@ -58,8 +71,8 @@ export function BookingExperience() {
           draft={draft}
           onRestart={() => {
             setDraft(initialDraft());
-            setStep(0);
             setConfirmed(false);
+            goToStep(0);
           }}
         />
       </>
@@ -137,7 +150,11 @@ export function BookingExperience() {
           </div>
         ) : null}
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="surface overflow-hidden rounded-[28px]">
+          <section
+            ref={flowRef}
+            tabIndex={-1}
+            className="surface scroll-mt-4 overflow-hidden rounded-[28px] outline-none"
+          >
             <Progress current={step} />
             <div className="min-h-[480px] p-5 sm:p-8">
               {step === 0 ? (
@@ -152,7 +169,7 @@ export function BookingExperience() {
                   onGoal={(goal) => patchDraft({ goal })}
                   onSubmit={(customer) => {
                     patchDraft({ customer });
-                    setStep(3);
+                    goToStep(3);
                   }}
                 />
               ) : null}
@@ -171,26 +188,26 @@ export function BookingExperience() {
                 <Button
                   variant="ghost"
                   disabled={step === 0}
-                  onClick={() => setStep((value) => value - 1)}
+                  onClick={() => goToStep(step - 1)}
                 >
                   <ArrowLeft size={17} /> Atrás
                 </Button>
                 <Button
                   disabled={!canContinue}
-                  onClick={() => setStep((value) => value + 1)}
+                  onClick={() => goToStep(step + 1)}
                 >
                   Continuar <ArrowRight size={17} />
                 </Button>
               </footer>
             ) : step === 2 ? (
               <footer className="border-t border-line bg-white/55 px-5 py-3 sm:px-8">
-                <Button variant="ghost" onClick={() => setStep(1)}>
+                <Button variant="ghost" onClick={() => goToStep(1)}>
                   <ArrowLeft size={17} /> Volver al horario
                 </Button>
               </footer>
             ) : (
               <footer className="border-t border-line bg-white/55 px-5 py-3 sm:px-8">
-                <Button variant="ghost" onClick={() => setStep(2)}>
+                <Button variant="ghost" onClick={() => goToStep(2)}>
                   <ArrowLeft size={17} /> Revisar datos
                 </Button>
               </footer>
