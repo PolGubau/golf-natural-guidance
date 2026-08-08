@@ -914,3 +914,274 @@ La interfaz no debería tener que cambiar sustancialmente durante esta migració
 - Suscripciones y renovaciones.
 
 Hasta resolver estas decisiones, se deben tratar como configuraciones de demo y no como comportamiento definitivo del producto.
+
+## 26. Datos públicos detectados en la web actual
+
+Se ha revisado la web pública de Golf Natural Guidance y el motor de reservas actualmente enlazado.
+
+Fuentes:
+
+- [Clases privadas](https://golfnaturalguidance.com/clases-privadas/)
+- [Equipo](https://golfnaturalguidance.com/equipo/)
+- [Junior Academy](https://golfnaturalguidance.com/junio-academy/)
+- [Sobre la academia](https://golfnaturalguidance.com/sobre-la-academia/)
+- [Motor actual de reservas](https://naturalgolf.golfmanager.com/consumer/home)
+
+La URL `https://eu.golfmanager.com/naturalgolf` requiere JavaScript. La web pública enlaza actualmente al motor `naturalgolf.golfmanager.com/consumer/home`.
+
+Estos datos son útiles para el seed de la demo, pero deben permanecer editables desde el backoffice y no deben convertirse en reglas fijas de producción.
+
+### 26.1. Equipo y precios públicos
+
+| Persona | Rol publicado | Precio cliente publicado |
+|---|---|---:|
+| Toni Planells | CEO y fundador | 150 €/hora |
+| Nico Loprete | Director general / Head Pro | 85 €/hora |
+| Giovanni Q | Profesional PGA | 85 €/hora |
+| Nuria Elizo | Profesora | 85 €/hora |
+| Marcelo Cuartero | Instructor / Head Instructor Fitness | 85 €/hora |
+
+Los precios anteriores son tarifas públicas para clientes. No deben interpretarse automáticamente como la compensación que se utilizará para facturar a cada profesor autónomo.
+
+El dominio debe separar:
+
+```text
+customerPrice       Precio mostrado al cliente
+teacherCompensation Importe correspondiente al profesor
+```
+
+Inicialmente pueden coincidir en la demo, pero deben ser campos independientes.
+
+### 26.2. Contacto y ubicación
+
+La web publica:
+
+- Teléfono general: `+34 678 808 435`.
+- Email general: `info@golfnaturalguidance.com`.
+- Ubicación: Arabella Golf Resort / Golf Son Muntaner.
+- Dirección: C/ Miquel Lladó, s/n, 07013 Palma, Mallorca.
+
+El CRM contiene además los datos del lead Toni Planells:
+
+- `649194500`.
+- `toni@golfnaturalguidance.com`.
+
+No se deben mezclar automáticamente. La demo debe distinguir entre `academyContact` y `leadContact`.
+
+### 26.3. Clases privadas
+
+La oferta pública indica:
+
+- Duración de 50 minutos.
+- Modalidad individual.
+- Modalidades compartidas para 2, 3 y 4 personas.
+- Bonos de 10 clases.
+- Trabajo de putt, juego corto, juego largo, driver y salida al campo.
+- Posibilidad de vídeo-análisis.
+- Palos incluidos.
+- Bolas incluidas.
+- Green fee incluido.
+- Reglas especiales para menores de 16 años acompañados por un adulto.
+
+La demo debe utilizar 50 minutos como duración seed, no 60 minutos. La reserva debe guardar el número de jugadores, porque una clase puede ser compartida.
+
+```ts
+type PrivateLessonOptions = {
+  durationMinutes: 50
+  playersMin: 1
+  playersMax: 4
+  includesClubs: boolean
+  includesBalls: boolean
+  includesGreenFee: boolean
+  videoAnalysisAvailable: boolean
+}
+```
+
+### 26.4. Niveles y catálogo público
+
+La web organiza su oferta por niveles:
+
+1. Conoce.
+2. Aprende.
+3. Mejora.
+4. Perfecciona.
+5. Profesionaliza.
+
+También muestra estas experiencias y productos:
+
+- Mallorca Golf Experience.
+- Análisis de Swing.
+- Fitting de palos.
+- Team Building.
+- Green Explorers.
+- Platzreife.
+- Junior Academy.
+- Summer Golf Camp.
+- Christmas Golf Camp.
+- Easter Golf Camp.
+
+El booking no debe mostrar todos como reservables automáticamente. Solo se muestran como reservables aquellos con precio, horario, capacidad y profesor configurados.
+
+```ts
+type ProductType =
+  | "private_lesson"
+  | "private_package"
+  | "group_course"
+  | "junior_subscription"
+  | "junior_package"
+  | "experience"
+  | "camp"
+  | "custom_program"
+```
+
+### 26.5. Junior Academy
+
+Datos públicos que pueden utilizarse en el seed:
+
+- Alumnos de 5 a 18 años.
+- Grupos organizados por edad y nivel.
+- Actividad durante todo el año.
+- Programas Aprende, Mejora, Perfecciona, Profesionaliza y Road to USA.
+
+#### Aprende
+
+- 90 minutos o 2 horas semanales.
+- Socios: 115 € / 140 € al mes.
+- No socios: 125 € / 150 € al mes.
+
+#### Mejora
+
+- 2 horas semanales.
+- Sesiones de fin de semana por la mañana y por la tarde.
+- Socios: 140 € al mes.
+- No socios: 150 € al mes.
+
+#### Perfecciona
+
+- 4 horas semanales.
+- Sesiones de fin de semana.
+- Socios: 205 € al mes.
+- No socios: 215 € al mes.
+
+#### Profesionaliza
+
+- Bonos de 10 horas.
+- Pro: 600 € para 1–2 jugadores y 1.000 € para 3–4 jugadores.
+- Head Pro: 650 € para 1–2 jugadores y 1.050 € para 3–4 jugadores.
+- La web indica que debe utilizarse al menos un bono al mes durante el año.
+
+#### Road to USA
+
+- Programa personalizado para estudiantes-deportistas.
+- Sin tarifa fija publicada.
+- En la demo debe mostrarse como “precio bajo consulta”.
+
+### 26.6. Precio por pertenencia a Arabella
+
+La oferta pública diferencia precios de socios y no socios. El booking debe poder manejar:
+
+```text
+memberType = arabella_member | non_member | unknown
+```
+
+El precio debe resolverse mediante una función de dominio, no mediante lógica en la UI:
+
+```text
+resolveCustomerPrice(product, memberType, playerCount)
+```
+
+La reserva debe guardar el precio aplicado como snapshot histórico.
+
+### 26.7. Reserva compartida
+
+La reserva no siempre corresponde a una única persona. Para clases de 2, 3 o 4 personas debe existir:
+
+```ts
+type BookingParticipant = {
+  id: string
+  name: string
+  email?: string
+  phone?: string
+}
+```
+
+Para la primera demo basta con pedir:
+
+- Nombre del responsable.
+- Número de jugadores.
+
+El detalle de cada acompañante puede quedar preparado como segunda iteración.
+
+### 26.8. Método de enseñanza y experiencia UX
+
+La web presenta el método GNG alrededor de:
+
+- Entrevista inicial.
+- Visión 360º.
+- Aprender jugando.
+- Personalización.
+- Seguimiento continuo.
+
+Esto puede mejorar el booking sin convertirlo en una landing. Se recomienda añadir un campo opcional:
+
+```text
+¿Qué quieres trabajar?
+```
+
+Opciones seed:
+
+- Putt.
+- Juego corto.
+- Juego largo.
+- Driver.
+- Salida al campo.
+- Vídeo-análisis.
+- Objetivo personalizado.
+
+### 26.9. Seed recomendado
+
+#### Profesores
+
+- Toni Planells — CEO y fundador — 150 €/hora.
+- Nico Loprete — Head Pro — 85 €/hora.
+- Giovanni Q — Profesional PGA — 85 €/hora.
+- Nuria Elizo — Profesora — 85 €/hora.
+- Marcelo Cuartero — Instructor — 85 €/hora.
+
+#### Productos
+
+- Clase privada individual — 50 minutos.
+- Clase privada para 2 personas — 50 minutos.
+- Clase privada para 3 personas — 50 minutos.
+- Clase privada para 4 personas — 50 minutos.
+- Bono privado de 10 clases.
+- Junior Academy — Aprende.
+- Junior Academy — Mejora.
+- Junior Academy — Perfecciona.
+- Junior Academy — Profesionaliza.
+- Road to USA — precio bajo consulta.
+- Análisis de Swing.
+- Fitting de palos.
+- Platzreife.
+- Mallorca Golf Experience.
+
+#### Ubicación
+
+- Arabella Golf Resort.
+- Golf Son Muntaner.
+- Palma, Mallorca.
+
+### 26.10. Datos que requieren confirmación
+
+- Si los precios de 85 € y 150 € siguen vigentes.
+- Si las clases bloquean exactamente 50, 60 o 70 minutos de agenda.
+- Si los precios incluyen IVA.
+- Si el green fee se incluye siempre.
+- Si se valida previamente la condición de socio.
+- Si los bonos y suscripciones se venden desde el nuevo sistema.
+- Si Junior Academy se gestiona por suscripción, bono o ambos.
+- Si los menores requieren datos del tutor.
+- Qué profesor está asignado a cada programa.
+- Qué tarifa interna corresponde a cada profesor autónomo.
+
+Mientras no se confirme, todos estos valores deben permanecer configurables en la demo.
