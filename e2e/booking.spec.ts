@@ -1,4 +1,15 @@
 import { expect, test } from "@playwright/test";
+import { MOCK_ADMIN_CREDENTIALS } from "../src/infrastructure/auth/mock-auth-provider";
+
+async function loginAsToni(page: import("@playwright/test").Page) {
+  await expect(
+    page.getByRole("heading", { name: "Bienvenido de nuevo" }),
+  ).toBeVisible();
+  await page.getByLabel("Email").fill(MOCK_ADMIN_CREDENTIALS.email);
+  await page.getByLabel("Contraseña").fill(MOCK_ADMIN_CREDENTIALS.password);
+  await page.getByRole("button", { name: "Entrar al backoffice" }).click();
+  await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
+}
 
 test("private lesson appears in the backoffice", async ({ page }) => {
   await page.goto("/booking");
@@ -23,6 +34,7 @@ test("private lesson appears in the backoffice", async ({ page }) => {
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
+  await loginAsToni(page);
   await page.getByRole("button", { name: "Reservas" }).click();
   await expect(page.getByText("Cliente E2E")).toBeVisible();
   await expect(page.getByText(/En persona · Pendiente/)).toBeVisible();
@@ -47,6 +59,7 @@ test("group activity only offers online payment and consumes a place", async ({
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
+  await loginAsToni(page);
   await page.getByRole("button", { name: "Cursos y actividades" }).click();
   await expect(page.getByText("1/6")).toBeVisible();
 });

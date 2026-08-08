@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const adminLoginSchema = z.object({
+  email: z.string().trim().email("Introduce un email válido"),
+  password: z.string().min(1, "Introduce tu contraseña"),
+});
+
 export const customerSchema = z.object({
   name: z.string().trim().min(2, "Escribe tu nombre"),
   email: z.string().trim().email("Introduce un email válido"),

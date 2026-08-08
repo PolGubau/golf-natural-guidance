@@ -4,10 +4,10 @@ import {
   Bell,
   CalendarDays,
   CalendarRange,
-  ChevronDown,
   CircleDollarSign,
   GraduationCap,
   LayoutDashboard,
+  LogOut,
   Menu,
   Settings2,
   UsersRound,
@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Brand } from "~/components/brand";
 import { Button } from "~/components/ui/button";
 import { ErrorState, LoadingState } from "~/components/ui/states";
+import type { AdminUser } from "~/infrastructure/auth/auth-provider";
 import { useDemo } from "~/infrastructure/state/demo-store";
 import { cn } from "~/lib/cn";
 import { ActivitiesView } from "./views/activities-view";
@@ -49,7 +50,13 @@ const navigation = [
   { id: "settings", label: "Configuración", icon: Settings2 },
 ] as const;
 
-export function AdminShell() {
+export function AdminShell({
+  user,
+  logoutAction,
+}: {
+  user: AdminUser;
+  logoutAction: () => Promise<void>;
+}) {
   const { data, status, recovered } = useDemo();
   const [section, setSection] = useState<AdminSection>("dashboard");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -126,15 +133,26 @@ export function AdminShell() {
           </div>
           <div className="mt-3 flex items-center gap-3 rounded-2xl border border-line p-3">
             <span className="grid size-9 place-items-center rounded-full bg-coral text-xs font-bold text-white">
-              GNG
+              TP
             </span>
             <span className="min-w-0 flex-1">
-              <strong className="block truncate text-xs">Equipo GNG</strong>
+              <strong className="block truncate text-xs">{user.name}</strong>
               <span className="block truncate text-[11px] text-muted">
-                Administración demo
+                {user.email}
               </span>
             </span>
-            <ChevronDown size={14} className="text-muted" />
+            <form action={logoutAction}>
+              <Button
+                type="submit"
+                variant="ghost"
+                size="sm"
+                className="px-2"
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+              >
+                <LogOut size={15} />
+              </Button>
+            </form>
           </div>
         </aside>
         {menuOpen ? (
