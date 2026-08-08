@@ -8,8 +8,11 @@ import {
   LocalClientAuthProvider,
 } from "~/infrastructure/auth/client-auth-provider";
 import { LocalStorageDemoRepository } from "~/infrastructure/local-storage/local-demo-repository";
+import { SimulatedDatabaseDemoRepository } from "~/infrastructure/repositories/simulated-database-demo-repository";
 
-const repository = new LocalStorageDemoRepository();
+const repository = new SimulatedDatabaseDemoRepository(
+  new LocalStorageDemoRepository(),
+);
 const clientAuth = new LocalClientAuthProvider();
 const dataAtom = atom<DemoData | null>(null);
 const statusAtom = atom<"loading" | "ready" | "error">("loading");
@@ -34,12 +37,8 @@ const commitAtom = atom(
     const current = get(dataAtom);
     if (!current) return;
     const next = recipe(current);
+    await repository.save(next);
     set(dataAtom, next);
-    try {
-      await repository.save(next);
-    } catch {
-      set(statusAtom, "error");
-    }
   },
 );
 

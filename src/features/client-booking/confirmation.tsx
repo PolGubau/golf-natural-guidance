@@ -79,7 +79,7 @@ export function Confirmation({
                 equipo.
               </p>
             </div>
-            <Badge tone="success">Demo operativa</Badge>
+            <Badge tone="success">Registro completado</Badge>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <ConnectionStep
@@ -92,7 +92,7 @@ export function Confirmation({
               title={isPaid ? "Pago registrado" : "Pago presencial pendiente"}
               detail={
                 isPaid
-                  ? "La plaza queda confirmada con el pago online simulado."
+                  ? "El pago online queda registrado y la plaza confirmada."
                   : "La clase se cobrará en la academia, tal como has elegido."
               }
             />
@@ -104,7 +104,7 @@ export function Confirmation({
             <ConnectionStep
               icon={<ChatCircleText size={18} />}
               title="Factura enviada al profesor"
-              detail="El envío al email fiscal se registra como simulado en esta demo local."
+              detail="El envío al email fiscal queda registrado para el equipo."
             />
           </div>
         </div>

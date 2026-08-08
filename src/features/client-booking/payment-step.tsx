@@ -123,7 +123,9 @@ export function PaymentStep({
           <Check size={17} />
         )}{" "}
         {submitting
-          ? "Confirmando…"
+          ? draft.paymentMethod === "online"
+            ? "Registrando pago…"
+            : "Registrando reserva…"
           : draft.paymentMethod === "online"
             ? "Confirmar y pagar"
             : "Confirmar y pagar en persona"}

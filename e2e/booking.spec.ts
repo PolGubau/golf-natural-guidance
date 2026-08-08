@@ -168,10 +168,10 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   await page.getByLabel("Nombre y apellidos").fill("Cliente E2E");
   await expect(page.getByLabel("Email")).toHaveValue("lucia@example.com");
   await page.getByRole("button", { name: /Continuar al pago/ }).click();
-  await page.getByRole("button", { name: /Pagar en persona/ }).click();
-  await page
-    .getByRole("button", { name: /Confirmar y pagar en persona/ })
-    .click();
+  await page.getByRole("button", { name: "Confirmar y pagar" }).click();
+  await expect(
+    page.getByRole("button", { name: "Registrando pago…" }),
+  ).toBeDisabled();
 
   await expect(
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
@@ -180,8 +180,11 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   await loginAsToni(page);
   await page.getByRole("link", { name: "Reservas", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/reservas$/);
-  await expect(page.getByText("Cliente E2E").first()).toBeVisible();
-  await expect(page.getByText(/En persona · Pendiente/)).toBeVisible();
+  const clientRow = page
+    .locator("tr")
+    .filter({ hasText: "Cliente E2E" })
+    .first();
+  await expect(clientRow).toContainText("Online · Cobrado");
 });
 
 test("group activity only offers online payment and consumes a place", async ({
