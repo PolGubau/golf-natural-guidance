@@ -213,8 +213,22 @@ function ActivityDialog({
       onOpenChange={(open) => !open && onClose()}
       title={activity ? "Editar actividad" : "Nueva actividad"}
       description="Las actividades publicadas requieren pago online."
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="activity-form" disabled={isSubmitting}>
+            <Check size={16} /> Guardar actividad
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit(submit)} className="grid gap-4">
+      <form
+        id="activity-form"
+        onSubmit={handleSubmit(submit)}
+        className="grid gap-4"
+      >
         <Field label="Nombre" error={errors.name?.message}>
           <Input {...register("name")} />
         </Field>
@@ -255,14 +269,6 @@ function ActivityDialog({
           />{" "}
           Visible y reservable
         </label>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            <Check size={16} /> Guardar actividad
-          </Button>
-        </div>
       </form>
     </Dialog>
   );

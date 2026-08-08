@@ -7,7 +7,7 @@ import {
 import Image from "next/image";
 import { useRef } from "react";
 import { getAvailableSlots, getAvailableTeacherSlots } from "~/domain/booking";
-import type { DemoData } from "~/domain/models";
+import { type DemoData, teacherCategoryCustomerPrices } from "~/domain/models";
 import { cn } from "~/lib/cn";
 import { localDateKey, upcomingDays } from "~/lib/dates";
 import {
@@ -326,7 +326,8 @@ export function ScheduleStep({
             {[...availableTeachers]
               .sort(
                 (a, b) =>
-                  a.customerPrice - b.customerPrice ||
+                  teacherCategoryCustomerPrices[a.category] -
+                    teacherCategoryCustomerPrices[b.category] ||
                   a.name.localeCompare(b.name),
               )
               .map((teacher) => (
@@ -369,7 +370,9 @@ export function ScheduleStep({
                     </span>
                   </span>
                   <strong className="text-sm">
-                    {formatMoney(teacher.customerPrice)}
+                    {formatMoney(
+                      teacherCategoryCustomerPrices[teacher.category],
+                    )}
                   </strong>
                 </button>
               ))}

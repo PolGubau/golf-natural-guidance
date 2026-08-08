@@ -1,3 +1,4 @@
+import { createCustomerInvoice } from "~/domain/customer-invoices";
 import type { DemoData, Teacher } from "~/domain/models";
 import { publicTeacherAssets } from "~/infrastructure/teacher-assets";
 import { addDays, localDateKey } from "~/lib/dates";
@@ -14,7 +15,6 @@ const teachers: Teacher[] = [
     "Toni Planells",
     "CEO y fundador",
     "master_teacher",
-    150,
     "#1e6b55",
     publicTeacherAssets.toniPlanells,
   ],
@@ -23,7 +23,6 @@ const teachers: Teacher[] = [
     "Nico Loprete",
     "Director general · Head Pro",
     "head_teacher",
-    85,
     "#e86f51",
     publicTeacherAssets.nicoLoprete,
   ],
@@ -32,7 +31,6 @@ const teachers: Teacher[] = [
     "Giovanni Quaquarelli",
     "Profesional PGA",
     "teacher",
-    85,
     "#527d9f",
     publicTeacherAssets.giovanniQuaquarelli,
   ],
@@ -41,7 +39,6 @@ const teachers: Teacher[] = [
     "Nuria Elizo",
     "Profesora",
     "teacher",
-    85,
     "#9c6a85",
     publicTeacherAssets.nuriaElizo,
   ],
@@ -50,18 +47,20 @@ const teachers: Teacher[] = [
     "Marcelo Cuartero",
     "Instructor · Fitness",
     "teacher",
-    85,
     "#b68b3c",
     publicTeacherAssets.marceloCuartero,
   ],
-].map(([id, name, publicRole, category, price, color, photoUrl]) => ({
+].map(([id, name, publicRole, category, color, photoUrl]) => ({
   id: `teacher-${id}`,
   name: String(name),
   photoUrl: String(photoUrl),
+  email: `facturacion.${String(id)}@golfnaturalguidance.com`,
+  fiscalName: `${String(name)} Golf Services`,
+  fiscalId: `X${String(id).padEnd(7, "0").slice(0, 7).toUpperCase()}A`,
+  fiscalAddress: "C/ del Golf, 1 · 07013 Palma de Mallorca",
+  invoiceSeries: `GNG-${String(id).toUpperCase()}`,
   publicRole: String(publicRole),
   category: category as Teacher["category"],
-  customerPrice: Number(price),
-  compensationRate: Number(price),
   active: true,
   availability: weekdays,
   color: String(color),
@@ -120,7 +119,7 @@ export function createSeed(): DemoData {
       color: "#e86f51",
     },
   ];
-  return {
+  const data: DemoData = {
     teachers,
     products: [
       {
@@ -167,8 +166,16 @@ export function createSeed(): DemoData {
         name: "Lucía Martín",
         email: "lucia@example.com",
         phone: "+34 600 123 456",
+        fiscalId: "12345678Z",
+        fiscalAddress: "C/ de la Marina, 18 · 07014 Palma de Mallorca",
       },
-      { id: "student-mateo", name: "Mateo Serra", email: "mateo@example.com" },
+      {
+        id: "student-mateo",
+        name: "Mateo Serra",
+        email: "mateo@example.com",
+        fiscalId: "87654321X",
+        fiscalAddress: "C/ del Mar, 24 · 07015 Palma de Mallorca",
+      },
     ],
     bookings: [
       {
@@ -251,6 +258,7 @@ export function createSeed(): DemoData {
       },
     ],
     invoices: [],
+    customerInvoices: [],
     settings: {
       timezone: "Europe/Madrid",
       currency: "EUR",
@@ -260,8 +268,32 @@ export function createSeed(): DemoData {
       academyContact: {
         phone: "+34 678 808 435",
         email: "info@golfnaturalguidance.com",
-        location: "Golf Son Muntaner · Palma",
+        website: "www.golfnaturalguidance.com",
+        location:
+          "C/ Club de Golf Son Muntaner · Calle Miquel Lladó, s/n · 07013 Palma",
       },
     },
+  };
+  return {
+    ...data,
+    customerInvoices: data.bookings.flatMap((booking) => {
+      const teacher = data.teachers.find(
+        (item) => item.id === booking.teacherId,
+      );
+      const student = data.students.find(
+        (item) => item.id === booking.studentId,
+      );
+      if (!teacher || !student) return [];
+      return [
+        createCustomerInvoice(
+          data,
+          booking,
+          student,
+          teacher,
+          data.activities.find((item) => item.id === booking.activityId),
+          booking.createdAt,
+        ),
+      ];
+    }),
   };
 }

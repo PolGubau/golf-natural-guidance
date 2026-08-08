@@ -7,6 +7,7 @@ import {
   PencilSimpleIcon as Edit3,
   PlusIcon as Plus,
   PowerIcon as Power,
+  MagnifyingGlassIcon as Search,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useState } from "react";
@@ -16,7 +17,13 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Dialog } from "~/components/ui/dialog";
 import { Field, Input, Select } from "~/components/ui/field";
-import type { AvailabilityRule, DemoData, Teacher } from "~/domain/models";
+import { EmptyState } from "~/components/ui/states";
+import {
+  type AvailabilityRule,
+  type DemoData,
+  type Teacher,
+  teacherCategoryCustomerPrices,
+} from "~/domain/models";
 import {
   type TeacherForm,
   type TeacherFormInput,
@@ -28,11 +35,36 @@ import { categoryLabels, formatMoney, initials } from "~/lib/format";
 export function TeachersView({ data }: { data: DemoData }) {
   const { commit } = useDemo();
   const [editing, setEditing] = useState<Teacher | null | undefined>();
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const teachers = data.teachers.filter((teacher) =>
+    !normalizedQuery
+      ? true
+      : [
+          teacher.name,
+          teacher.email ?? "",
+          teacher.phone ?? "",
+          teacher.publicRole,
+          categoryLabels[teacher.category],
+        ].some((value) => value.toLocaleLowerCase().includes(normalizedQuery)),
+  );
   const toggle = (teacher: Teacher) =>
     void commit((current) =>
       saveTeacher(
         current,
-        { ...teacher, active: !teacher.active },
+        {
+          name: teacher.name,
+          email: teacher.email ?? "",
+          phone: teacher.phone ?? "",
+          fiscalName: teacher.fiscalName,
+          fiscalId: teacher.fiscalId,
+          fiscalAddress: teacher.fiscalAddress,
+          invoiceSeries: teacher.invoiceSeries,
+          publicRole: teacher.publicRole,
+          category: teacher.category,
+          active: !teacher.active,
+          color: teacher.color,
+        },
         teacher.id,
         teacher.availability,
       ),
@@ -45,94 +77,110 @@ export function TeachersView({ data }: { data: DemoData }) {
             Equipo docente
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Tarifas, compensación y disponibilidad.
+            Categorías, tarifas públicas y disponibilidad.
           </p>
         </div>
         <Button onClick={() => setEditing(null)}>
           <Plus size={16} /> Nuevo profesor
         </Button>
       </div>
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {data.teachers.map((teacher) => (
-          <article
-            key={teacher.id}
-            className={`surface rounded-[22px] p-5 transition ${teacher.active ? "" : "opacity-60 grayscale-[.35]"}`}
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className="size-12 shrink-0 overflow-hidden rounded-full bg-sand"
-                style={{ backgroundColor: teacher.color }}
-              >
-                {teacher.photoUrl ? (
-                  <Image
-                    src={teacher.photoUrl}
-                    alt={`Foto de ${teacher.name}`}
-                    width={48}
-                    height={48}
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <span className="grid size-full place-items-center text-sm font-bold text-white">
-                    {initials(teacher.name)}
-                  </span>
-                )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <strong className="block truncate">{teacher.name}</strong>
-                <span className="block truncate text-xs text-muted">
-                  {teacher.publicRole}
-                </span>
-              </div>
-              <Badge tone={teacher.active ? "success" : "neutral"}>
-                {teacher.active ? "Activo" : "Inactivo"}
-              </Badge>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <div className="rounded-xl bg-sand p-3">
-                <span className="text-[10px] text-muted">Precio cliente</span>
-                <strong className="mt-1 block">
-                  {formatMoney(teacher.customerPrice)}
-                </strong>
-              </div>
-              <div className="rounded-xl bg-sand p-3">
-                <span className="text-[10px] text-muted">Tarifa interna</span>
-                <strong className="mt-1 block">
-                  {formatMoney(teacher.compensationRate)}/h
-                </strong>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs text-muted">
-              <span className="flex items-center gap-1.5">
-                <CalendarClock size={14} />
-                {availabilitySummary(teacher.availability)}
-              </span>
-              <span>{categoryLabels[teacher.category]}</span>
-            </div>
-            <div className="mt-5 flex gap-2 border-t border-line pt-4">
-              <Button
-                className="flex-1"
-                variant="secondary"
-                size="sm"
-                onClick={() => setEditing(teacher)}
-              >
-                <Edit3 size={14} /> Editar
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggle(teacher)}
-                aria-label={
-                  teacher.active
-                    ? `Desactivar a ${teacher.name}`
-                    : `Activar a ${teacher.name}`
-                }
-              >
-                <Power size={15} />
-              </Button>
-            </div>
-          </article>
-        ))}
+      <div className="mt-5 max-w-md">
+        <Input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Buscar por nombre, email o teléfono"
+          aria-label="Buscar profesores por nombre, email o teléfono"
+        />
       </div>
+      {teachers.length ? (
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {teachers.map((teacher) => (
+            <article
+              key={teacher.id}
+              className={`surface rounded-[22px] p-5 transition ${teacher.active ? "" : "opacity-60 grayscale-[.35]"}`}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className="size-12 shrink-0 overflow-hidden rounded-full bg-sand"
+                  style={{ backgroundColor: teacher.color }}
+                >
+                  {teacher.photoUrl ? (
+                    <Image
+                      src={teacher.photoUrl}
+                      alt={`Foto de ${teacher.name}`}
+                      width={48}
+                      height={48}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <span className="grid size-full place-items-center text-sm font-bold text-white">
+                      {initials(teacher.name)}
+                    </span>
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <strong className="block truncate">{teacher.name}</strong>
+                  <span className="block truncate text-xs text-muted">
+                    {teacher.publicRole}
+                  </span>
+                </div>
+                <Badge tone={teacher.active ? "success" : "neutral"}>
+                  {teacher.active ? "Activo" : "Inactivo"}
+                </Badge>
+              </div>
+              <div className="mt-5">
+                <div className="rounded-xl bg-sand p-3">
+                  <span className="text-[10px] text-muted">Precio cliente</span>
+                  <strong className="mt-1 block">
+                    {formatMoney(
+                      teacherCategoryCustomerPrices[teacher.category],
+                    )}
+                    /h
+                  </strong>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-muted">
+                <span className="flex items-center gap-1.5">
+                  <CalendarClock size={14} />
+                  {availabilitySummary(teacher.availability)}
+                </span>
+                <span>{categoryLabels[teacher.category]}</span>
+              </div>
+              <div className="mt-5 flex gap-2 border-t border-line pt-4">
+                <Button
+                  className="flex-1"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setEditing(teacher)}
+                >
+                  <Edit3 size={14} /> Editar
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggle(teacher)}
+                  aria-label={
+                    teacher.active
+                      ? `Desactivar a ${teacher.name}`
+                      : `Activar a ${teacher.name}`
+                  }
+                >
+                  <Power size={15} />
+                </Button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5">
+          <EmptyState
+            icon={<Search />}
+            title="No hay profesores que coincidan"
+            description="Prueba con otro nombre, email o teléfono."
+          />
+        </div>
+      )}
       {editing !== undefined ? (
         <TeacherDialog
           teacher={editing}
@@ -177,19 +225,27 @@ function TeacherDialog({
     defaultValues: teacher
       ? {
           name: teacher.name,
+          email: teacher.email ?? "",
+          phone: teacher.phone ?? "",
+          fiscalName: teacher.fiscalName,
+          fiscalId: teacher.fiscalId,
+          fiscalAddress: teacher.fiscalAddress,
+          invoiceSeries: teacher.invoiceSeries,
           publicRole: teacher.publicRole,
           category: teacher.category,
-          customerPrice: teacher.customerPrice,
-          compensationRate: teacher.compensationRate,
           active: teacher.active,
           color: teacher.color,
         }
       : {
           name: "",
+          email: "",
+          phone: "",
+          fiscalName: "",
+          fiscalId: "",
+          fiscalAddress: "",
+          invoiceSeries: "GNG-NUEVO",
           publicRole: "Profesor",
           category: "teacher",
-          customerPrice: 85,
-          compensationRate: 85,
           active: true,
           color: "#1e6b55",
         },
@@ -210,12 +266,36 @@ function TeacherDialog({
       open
       onOpenChange={(open) => !open && onClose()}
       title={teacher ? "Editar profesor" : "Nuevo profesor"}
-      description="Los cambios afectan a nuevas reservas; el histórico conserva sus precios."
+      description="Los datos fiscales se usan para emitir las facturas de sus reservas."
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            form="teacher-form"
+            disabled={isSubmitting || !days.length}
+          >
+            <Check size={16} /> Guardar profesor
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit(submit)} className="grid gap-4">
+      <form
+        id="teacher-form"
+        onSubmit={handleSubmit(submit)}
+        className="grid gap-4"
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" error={errors.name?.message}>
             <Input {...register("name")} />
+          </Field>
+          <Field label="Email de facturación" error={errors.email?.message}>
+            <Input type="email" {...register("email")} />
+          </Field>
+          <Field label="Teléfono">
+            <Input type="tel" {...register("phone")} />
           </Field>
           <Field label="Rol público" error={errors.publicRole?.message}>
             <Input {...register("publicRole")} />
@@ -230,17 +310,30 @@ function TeacherDialog({
           <Field label="Color">
             <Input type="color" className="p-1.5" {...register("color")} />
           </Field>
-          <Field label="Precio cliente (€)">
-            <Input type="number" step="0.01" {...register("customerPrice")} />
-          </Field>
-          <Field label="Compensación (€/h)">
-            <Input
-              type="number"
-              step="0.01"
-              {...register("compensationRate")}
-            />
-          </Field>
         </div>
+        <fieldset className="rounded-2xl border border-line p-4">
+          <legend className="px-1 text-sm font-semibold">Datos fiscales</legend>
+          <div className="mt-2 grid gap-4 sm:grid-cols-2">
+            <Field label="Razón social" error={errors.fiscalName?.message}>
+              <Input {...register("fiscalName")} />
+            </Field>
+            <Field label="NIF / CIF" error={errors.fiscalId?.message}>
+              <Input {...register("fiscalId")} />
+            </Field>
+            <Field
+              label="Dirección fiscal"
+              error={errors.fiscalAddress?.message}
+            >
+              <Input {...register("fiscalAddress")} />
+            </Field>
+            <Field
+              label="Serie de facturación"
+              error={errors.invoiceSeries?.message}
+            >
+              <Input {...register("invoiceSeries")} />
+            </Field>
+          </div>
+        </fieldset>
         <fieldset className="rounded-2xl border border-line p-4">
           <legend className="px-1 text-sm font-semibold">
             Disponibilidad semanal
@@ -296,14 +389,6 @@ function TeacherDialog({
           />{" "}
           Disponible para nuevas reservas
         </label>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="ghost" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isSubmitting || !days.length}>
-            <Check size={16} /> Guardar profesor
-          </Button>
-        </div>
       </form>
     </Dialog>
   );

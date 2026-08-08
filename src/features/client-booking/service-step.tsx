@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { availablePlaces } from "~/domain/booking";
-import type { DemoData } from "~/domain/models";
+import { type DemoData, teacherCategoryCustomerPrices } from "~/domain/models";
 import { cn } from "~/lib/cn";
 import {
   categoryLabels,
@@ -30,26 +30,31 @@ const bookingSections: ReadonlyArray<{
   value: BookingSection;
   label: string;
   description: string;
+  image: string;
 }> = [
   {
     value: "private",
     label: "Clases privadas",
     description: "Reserva una sesión a tu medida",
+    image: "/golf/private-lessons.jpg",
   },
   {
     value: "activities",
     label: "Cursos y actividades",
     description: "Experiencias con fecha y plazas",
+    image: "/golf/team.png",
   },
   {
     value: "junior",
     label: "Junior Academy",
     description: "Programas para jóvenes",
+    image: "/golf/junior-academy.jpg",
   },
   {
     value: "packages",
     label: "Bonos y programas",
     description: "Opciones para entrenar con continuidad",
+    image: "/golf/programs.jpg",
   },
 ];
 
@@ -69,6 +74,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
     (activity) => activity.active && new Date(activity.endsAt) > new Date(),
   );
   const detailsRef = useRef<HTMLElement>(null);
+  const sectionContentRef = useRef<HTMLDivElement>(null);
   const selectedTeacher = data.teachers.find(
     (teacher) => teacher.id === draft.teacherId,
   );
@@ -85,6 +91,17 @@ export function ServiceStep({ data, draft, onChange }: Props) {
   const selectSection = (next: BookingSection) => {
     setSection(next);
     onChange(resetSelection);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        sectionContentRef.current?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+      });
+    });
   };
   const revealDetails = (patch: Partial<BookingDraft>) => {
     onChange(patch);
@@ -146,68 +163,68 @@ export function ServiceStep({ data, draft, onChange }: Props) {
             </p>
           </div>
           <div
-            className="grid gap-3 sm:grid-cols-2"
+            className="grid gap-3 sm:grid-cols-3"
             aria-label="Categorías de reserva"
             role="tablist"
           >
-            {bookingSections.map(({ value, label, description }, index) => {
-              const image = activeTeachers[
-                value === "private"
-                  ? 0
-                  : value === "activities"
-                    ? 1
-                    : value === "junior"
-                      ? 2
-                      : 3
-              ]?.photoUrl;
-              return (
-                <button
-                  type="button"
-                  key={value}
-                  id={`booking-tab-${value}`}
-                  role="tab"
-                  aria-selected={section === value}
-                  onClick={() => selectSection(value)}
-                  className={cn(
-                    "group relative isolate min-h-32 overflow-hidden rounded-xl text-left text-white transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60",
-                    value === "private" && "sm:col-span-2 sm:min-h-40",
-                    section === value
-                      ? "shadow-lg shadow-forest/15 ring-2 ring-coral/70"
-                      : "shadow-sm hover:shadow-lg hover:shadow-forest/10",
-                  )}
-                >
-                  {image ? (
-                    <Image
-                      src={image}
-                      alt=""
-                      fill
-                      sizes={value === "private" ? "700px" : "350px"}
-                      className="absolute inset-0 -z-20 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                  ) : null}
-                  <span className="absolute inset-0 -z-10 bg-gradient-to-t from-forest/95 via-forest/45 to-forest/10" />
-                  <span className="absolute top-4 right-4 grid size-6 place-items-center rounded-full border border-white/60 bg-black/10 text-transparent backdrop-blur-sm transition-colors duration-200 group-hover:border-white group-hover:text-white">
-                    <Check size={14} weight="bold" />
-                  </span>
-                  <span className="absolute right-4 bottom-4 left-4 block">
-                    <span className="mb-2 block text-[10px] font-medium tracking-[.08em] text-white/65">
-                      {String(index + 1).padStart(2, "0")}
+            {bookingSections.map(
+              ({ value, label, description, image }, index) => {
+                return (
+                  <button
+                    type="button"
+                    key={value}
+                    id={`booking-tab-${value}`}
+                    role="tab"
+                    aria-selected={section === value}
+                    onClick={() => selectSection(value)}
+                    className={cn(
+                      "group relative isolate min-h-32 overflow-hidden rounded-xl text-left text-white transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60",
+                      value === "private" && "sm:col-span-3 sm:min-h-40",
+                      section === value
+                        ? "shadow-lg shadow-forest/15 ring-2 ring-coral/70"
+                        : "shadow-sm hover:shadow-lg hover:shadow-forest/10",
+                    )}
+                  >
+                    {image ? (
+                      <Image
+                        src={image}
+                        alt=""
+                        fill
+                        sizes={value === "private" ? "700px" : "350px"}
+                        className="absolute inset-0 -z-20 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                    ) : null}
+                    <span className="absolute inset-0 -z-10 bg-gradient-to-t from-forest/95 via-forest/45 to-forest/10" />
+                    <span
+                      className={cn(
+                        "absolute top-4 right-4 grid size-6 place-items-center rounded-full border bg-black/10 backdrop-blur-sm transition-colors duration-200",
+                        section === value
+                          ? "border-coral bg-coral text-white"
+                          : "border-white/60 text-transparent group-hover:border-white group-hover:text-white",
+                      )}
+                    >
+                      <Check size={14} weight="bold" />
                     </span>
-                    <span className="block text-base font-semibold tracking-tight sm:text-lg">
-                      {label}
+                    <span className="absolute right-4 bottom-4 left-4 block">
+                      <span className="mb-2 block text-[10px] font-medium tracking-[.08em] text-white/65">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="block text-base font-semibold tracking-tight sm:text-lg">
+                        {label}
+                      </span>
+                      <span className="mt-1 block max-w-[34rem] text-xs leading-5 text-white/75">
+                        {description}
+                      </span>
                     </span>
-                    <span className="mt-1 block max-w-[34rem] text-xs leading-5 text-white/75">
-                      {description}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              },
+            )}
           </div>
         </div>
         {section === "private" ? (
           <>
-            <div className="mb-3">
+            <div ref={sectionContentRef} className="mb-3 scroll-mt-6">
               <button
                 type="button"
                 aria-pressed={draft.discoveryMode === "schedule_first"}
@@ -326,7 +343,10 @@ export function ServiceStep({ data, draft, onChange }: Props) {
           </>
         ) : null}
         {section !== "private" ? (
-          <div className="mb-3 flex items-end justify-between gap-4">
+          <div
+            ref={sectionContentRef}
+            className="mb-3 flex scroll-mt-6 items-end justify-between gap-4"
+          >
             <div>
               <h3 className="font-semibold">
                 {section === "packages"
@@ -364,7 +384,6 @@ export function ServiceStep({ data, draft, onChange }: Props) {
               return (
                 <ActivityCard
                   key={activity.id}
-                  action={places ? "Ver actividad" : "Completa"}
                   disabled={!places}
                   selected={
                     draft.activityId === activity.id &&
@@ -483,7 +502,10 @@ export function ServiceStep({ data, draft, onChange }: Props) {
           </h2>
           <p className="mt-1 text-sm text-muted">
             {categoryLabels[selectedTeacher.category]} · 50 minutos ·{" "}
-            {formatMoney(selectedTeacher.customerPrice)} por sesión
+            {formatMoney(
+              teacherCategoryCustomerPrices[selectedTeacher.category],
+            )}{" "}
+            por sesión
           </p>
           <label className="mt-5 grid max-w-xs gap-2 text-sm font-medium">
             Número de jugadores
@@ -622,7 +644,7 @@ function TeacherCard({
       </span>
       <span className="text-right">
         <strong className="block text-sm">
-          {formatMoney(teacher.customerPrice)}
+          {formatMoney(teacherCategoryCustomerPrices[teacher.category])}
         </strong>
         <span className="text-[11px] text-muted">por sesión</span>
       </span>
@@ -635,7 +657,6 @@ function ActivityCard({
   activity,
   teacherName,
   places,
-  action,
   selected,
   disabled,
   onClick,
@@ -643,7 +664,6 @@ function ActivityCard({
   activity: DemoData["activities"][number];
   teacherName: string;
   places: number;
-  action: string;
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
@@ -656,12 +676,14 @@ function ActivityCard({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "group grid min-h-28 grid-cols-[58px_1fr_auto] items-center gap-4 border-b py-4 text-left transition",
-        selected ? "border-forest" : "border-line hover:border-forest/50",
+        "group grid min-h-44 grid-cols-[64px_minmax(0,1fr)] items-start gap-4 rounded-[20px] border bg-white p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-forest/50 hover:shadow-md focus-visible:-translate-y-0.5 focus-visible:border-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest",
+        selected
+          ? "border-forest bg-forest/[.04] ring-1 ring-forest/20"
+          : "border-line",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
-      <span className="border-r border-line pr-4 text-center">
+      <span className="rounded-2xl bg-sand px-2 py-3 text-center">
         <span className="block text-[11px] font-bold uppercase tracking-[.12em] text-coral">
           {date
             .toLocaleDateString("es-ES", { weekday: "short" })
@@ -676,17 +698,39 @@ function ActivityCard({
             .replace(".", "")}
         </span>
       </span>
-      <span className="min-w-0">
-        <strong className="block truncate text-sm">{activity.name}</strong>
-        <span className="mt-1 block truncate text-xs text-muted">
-          {formatTime(activity.startsAt)} · {places} plazas · {teacherName}
+      <span className="flex min-w-0 flex-col">
+        <strong className="pr-9 text-base leading-5 transition-colors group-hover:text-forest">
+          {activity.name}
+        </strong>
+        <span className="mt-1.5 line-clamp-2 text-xs leading-5 text-muted">
+          {activity.description}
         </span>
-        <span className="mt-2 block text-xs font-medium text-muted">
-          {formatMoney(activity.price)} por persona
+        <span className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 text-xs font-medium text-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <Clock3 size={14} />
+            {formatTime(activity.startsAt)}–{formatTime(activity.endsAt)}
+          </span>
+          <span>Con {teacherName}</span>
         </span>
-      </span>
-      <span className="hidden items-center gap-1 text-xs font-bold text-forest sm:inline-flex">
-        {action} <ArrowRight size={14} />
+        <span className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
+          <span>
+            <strong className="block text-sm text-ink">
+              {formatMoney(activity.price)}
+            </strong>
+            <span className="block text-[11px] text-muted">por persona</span>
+          </span>
+          <span className="flex items-center gap-2">
+            <Badge tone={places ? "success" : "danger"}>
+              {places ? `${places} plazas disponibles` : "Plazas completas"}
+            </Badge>
+            <span
+              aria-hidden="true"
+              className="grid size-8 shrink-0 place-items-center rounded-full bg-forest text-white transition-transform group-hover:translate-x-0.5"
+            >
+              <ArrowRight size={16} />
+            </span>
+          </span>
+        </span>
       </span>
     </button>
   );

@@ -23,6 +23,7 @@ export function saveTeacher(
   const current = data.teachers.find((teacher) => teacher.id === teacherId);
   const teacher: Teacher = {
     id: current?.id ?? makeId("teacher"),
+    photoUrl: current?.photoUrl,
     availability: availability ?? current?.availability ?? defaultAvailability,
     ...values,
   };

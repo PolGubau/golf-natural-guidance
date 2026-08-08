@@ -9,14 +9,28 @@ export const customerSchema = z.object({
   name: z.string().trim().min(2, "Escribe tu nombre"),
   email: z.string().trim().email("Introduce un email válido"),
   phone: z.string().trim().optional(),
+  fiscalId: z.string().trim().min(5, "Introduce tu NIF, NIE o CIF"),
+  fiscalAddress: z
+    .string()
+    .trim()
+    .min(8, "Introduce tu dirección fiscal completa"),
 });
 
 export const teacherFormSchema = z.object({
   name: z.string().trim().min(2, "El nombre es obligatorio"),
+  email: z
+    .string()
+    .trim()
+    .email("Introduce un email válido")
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
+  phone: z.string().trim(),
+  fiscalName: z.string().trim().min(2, "La razón social es obligatoria"),
+  fiscalId: z.string().trim().min(5, "Introduce el NIF o CIF"),
+  fiscalAddress: z.string().trim().min(8, "Introduce la dirección fiscal"),
+  invoiceSeries: z.string().trim().min(2, "Indica la serie de facturación"),
   publicRole: z.string().trim().min(2, "El rol es obligatorio"),
   category: z.enum(["teacher", "head_teacher", "master_teacher"]),
-  customerPrice: z.coerce.number().min(0),
-  compensationRate: z.coerce.number().min(0),
   active: z.boolean(),
   color: z.string().regex(/^#[0-9a-f]{6}$/i),
 });

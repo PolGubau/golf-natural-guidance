@@ -6,19 +6,19 @@ import {
   GraduationCapIcon as GraduationCap,
   UsersThreeIcon as UsersRound,
 } from "@phosphor-icons/react";
+import Link from "next/link";
+import {
+  PerformanceOverview,
+  RevenueECharts,
+} from "~/components/ui/admin-charts";
+import { getBusinessInsights } from "~/domain/analytics";
 import type { DemoData } from "~/domain/models";
 import { localDateKey } from "~/lib/dates";
-import { formatDate, formatMoney, formatTime, initials } from "~/lib/format";
-import type { AdminSection } from "../admin-shell";
+import { formatMoney, formatTime, initials } from "~/lib/format";
 
-export function DashboardView({
-  data,
-  onNavigate,
-}: {
-  data: DemoData;
-  onNavigate: (section: AdminSection) => void;
-}) {
+export function DashboardView({ data }: { data: DemoData }) {
   const today = localDateKey(new Date());
+  const insights = getBusinessInsights(data);
   const upcoming = data.bookings
     .filter(
       (booking) =>
@@ -26,9 +26,6 @@ export function DashboardView({
         booking.startsAt.slice(0, 10) >= today,
     )
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
-  const collected = data.payments
-    .filter((payment) => payment.status === "paid")
-    .reduce((total, payment) => total + payment.amount, 0);
   const pendingCompensation = data.compensationLines
     .filter((line) => line.status === "pending")
     .reduce((total, line) => total + line.amount, 0);
@@ -46,25 +43,106 @@ export function DashboardView({
           <Metric
             icon={<CircleDollarSign />}
             label="Cobrado"
-            value={formatMoney(collected)}
-            note="Pagos online"
+            value={formatMoney(insights.collectedRevenue)}
+            note="Pagos registrados"
           />
           <Metric
             icon={<GraduationCap />}
-            label="Profesores activos"
-            value={String(
-              data.teachers.filter((teacher) => teacher.active).length,
-            )}
-            note={`${data.teachers.length} configurados`}
+            label="Pendiente de cobro"
+            value={formatMoney(insights.pendingRevenue)}
+            note="Reservas confirmadas"
           />
           <Metric
             icon={<UsersRound />}
-            label="Clientes"
-            value={String(data.students.length)}
-            note="Perfiles registrados"
+            label="Reservas confirmadas"
+            value={String(insights.confirmedBookings)}
+            note={`${data.students.length} clientes registrados`}
           />
         </div>
       </section>
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(290px,.75fr)]">
+        <RevenueECharts data={insights.revenueByMonth} />
+        <section className="surface rounded-[22px] p-5">
+          <p className="text-xs font-bold uppercase tracking-[.14em] text-muted">
+            Salud del negocio
+          </p>
+          <h2 className="mt-2 font-semibold">Indicadores clave</h2>
+          <div className="mt-5 space-y-4">
+            <HealthMetric
+              label="Asistencia"
+              value={formatPercentage(insights.attendanceRate)}
+              description="Sesiones completadas sobre cerradas"
+              tone="bg-forest"
+            />
+            <HealthMetric
+              label="Cancelaciones"
+              value={formatPercentage(insights.cancellationRate)}
+              description="Sobre el total de reservas"
+              tone="bg-coral"
+            />
+            <HealthMetric
+              label="Ticket medio"
+              value={
+                insights.averageTicket === null
+                  ? "—"
+                  : formatMoney(insights.averageTicket)
+              }
+              description="Media de los cobros realizados"
+              tone="bg-[#d5a84b]"
+            />
+            <HealthMetric
+              label="Clientes recurrentes"
+              value={formatPercentage(insights.repeatCustomerRate)}
+              description="Clientes con dos o más reservas"
+              tone="bg-[#527d9f]"
+            />
+          </div>
+        </section>
+      </section>
+      <PerformanceOverview
+        sections={[
+          {
+            id: "services",
+            label: "Servicios",
+            description: "Ingresos cobrados por servicio",
+            empty: "Aún no hay cobros por servicio.",
+            items: insights.services.slice(0, 3).map((service) => ({
+              label: service.name,
+              value: service.revenue,
+              displayValue: formatMoney(service.revenue),
+              detail: `${service.bookings} reserva${service.bookings !== 1 ? "s" : ""}`,
+              color: "#183e32",
+            })),
+          },
+          {
+            id: "teachers",
+            label: "Profesores",
+            description: "Ingresos cobrados y reservas realizadas",
+            empty: "Aún no hay actividad facturada.",
+            items: insights.teachers.slice(0, 3).map((teacher) => ({
+              label: teacher.name,
+              value: teacher.revenue,
+              displayValue: formatMoney(teacher.revenue),
+              detail: `${teacher.bookings} reserva${teacher.bookings !== 1 ? "s" : ""}`,
+              color: teacher.color,
+            })),
+          },
+          {
+            id: "activities",
+            label: "Aforo",
+            description: "Plazas reservadas en próximas actividades",
+            empty: "No hay actividades próximas configuradas.",
+            percentage: true,
+            items: insights.activities.slice(0, 3).map((activity) => ({
+              label: activity.name,
+              value: activity.occupancyRate,
+              displayValue: formatPercentage(activity.occupancyRate),
+              detail: `${activity.bookedSeats} de ${activity.capacity} plazas`,
+              color: activity.color,
+            })),
+          },
+        ]}
+      />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(300px,.7fr)]">
         <section className="surface rounded-[22px] p-5">
           <div className="flex items-center justify-between">
@@ -74,13 +152,12 @@ export function DashboardView({
                 Clases y actividades confirmadas
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => onNavigate("agenda")}
+            <Link
+              href="/admin/agenda"
               className="flex items-center gap-1 text-xs font-semibold text-forest"
             >
               Ver agenda <ArrowUpRight size={14} />
-            </button>
+            </Link>
           </div>
           <div className="mt-5 divide-y divide-line">
             {upcoming.slice(0, 5).map((booking) => {
@@ -139,13 +216,12 @@ export function DashboardView({
             }{" "}
             líneas de compensación listas para agrupar.
           </p>
-          <button
-            type="button"
-            onClick={() => onNavigate("billing")}
+          <Link
+            href="/admin/facturacion"
             className="mt-5 flex min-h-10 w-full items-center justify-center rounded-xl bg-forest text-sm font-semibold text-white"
           >
             Ir a facturación
-          </button>
+          </Link>
           <div className="mt-6 border-t border-line pt-4">
             <p className="text-xs font-semibold">Equipo disponible</p>
             <div className="mt-3 flex -space-x-2">
@@ -165,30 +241,35 @@ export function DashboardView({
           </div>
         </section>
       </div>
-      <section className="rounded-[22px] bg-forest p-6 text-white sm:flex sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-coral">
-            Siguiente sesión
-          </p>
-          <h2 className="mt-2 text-xl font-semibold">
-            {upcoming[0]
-              ? formatDate(upcoming[0].startsAt, {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })
-              : "Sin reservas próximas"}
-          </h2>
-          <p className="mt-1 text-sm text-white/60">
-            {upcoming[0]
-              ? `${formatTime(upcoming[0].startsAt)} · ${data.teachers.find((item) => item.id === upcoming[0].teacherId)?.name}`
-              : "La agenda está despejada"}
-          </p>
-        </div>
-        <CalendarCheck2 className="mt-5 text-white/25 sm:mt-0" size={54} />
-      </section>
     </div>
   );
+}
+
+function HealthMetric({
+  label,
+  value,
+  description,
+  tone,
+}: {
+  label: string;
+  value: string;
+  description: string;
+  tone: string;
+}) {
+  return (
+    <div className="grid grid-cols-[10px_1fr_auto] items-center gap-3">
+      <span className={`h-9 rounded-full ${tone}`} aria-hidden="true" />
+      <span>
+        <strong className="block text-sm">{label}</strong>
+        <span className="block text-xs text-muted">{description}</span>
+      </span>
+      <strong className="text-sm">{value}</strong>
+    </div>
+  );
+}
+
+function formatPercentage(value: number | null) {
+  return value === null ? "—" : `${Math.round(value * 100)}%`;
 }
 
 function Metric({

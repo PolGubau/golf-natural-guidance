@@ -1,10 +1,11 @@
-import type {
-  Activity,
-  Booking,
-  DemoData,
-  MemberType,
-  PaymentMethod,
-  Teacher,
+import {
+  type Activity,
+  type Booking,
+  type DemoData,
+  type MemberType,
+  type PaymentMethod,
+  type Teacher,
+  teacherCategoryCustomerPrices,
 } from "./models";
 
 const occupyingStatuses = new Set(["pending", "confirmed"]);
@@ -21,7 +22,13 @@ export type CreateBookingInput = {
   memberType: MemberType;
   goal?: string;
   paymentMethod: PaymentMethod;
-  customer: { name: string; email: string; phone?: string };
+  customer: {
+    name: string;
+    email: string;
+    phone?: string;
+    fiscalId: string;
+    fiscalAddress: string;
+  };
 };
 
 export function overlaps(
@@ -52,7 +59,7 @@ export function resolveCustomerPrice(
   teacher: Teacher,
   memberType: MemberType,
 ) {
-  if (!activity) return teacher.customerPrice;
+  if (!activity) return teacherCategoryCustomerPrices[teacher.category];
   if (memberType === "arabella_member" && activity.memberPrice != null)
     return activity.memberPrice;
   return activity.price;

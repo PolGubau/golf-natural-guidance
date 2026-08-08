@@ -2,6 +2,7 @@
 
 import {
   DatabaseIcon as Database,
+  GlobeIcon as Globe,
   EnvelopeSimpleIcon as Mail,
   MapPinIcon as MapPin,
   PhoneIcon as Phone,
@@ -66,6 +67,29 @@ export function SettingsView({ data }: { data: DemoData }) {
           </div>
         </section>
         <section className="surface rounded-[22px] p-5">
+          <h3 className="font-semibold">Reglas de la academia</h3>
+          <p className="mt-1 text-xs leading-5 text-muted">
+            La configuración que gobierna la reserva y el cierre operativo.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Rule
+              label="Clase privada"
+              value={`${data.settings.privateLessonDuration} min`}
+            />
+            <Rule
+              label="Intervalo de agenda"
+              value={`${data.settings.slotIntervalMinutes} min`}
+            />
+            <Rule label="Pago privado" value="Online o presencial" />
+            <Rule
+              label="Actividades y cursos"
+              value="Pago online obligatorio"
+            />
+            <Rule label="Cierre de profesores" value="Mensual" />
+            <Rule label="Contabilidad" value="A3 · exportación preparada" />
+          </div>
+        </section>
+        <section className="surface rounded-[22px] p-5">
           <h3 className="font-semibold">Academia</h3>
           <div className="mt-5 space-y-3 text-sm">
             <p className="flex items-center gap-3">
@@ -75,6 +99,10 @@ export function SettingsView({ data }: { data: DemoData }) {
             <p className="flex items-center gap-3">
               <Mail className="text-muted" size={17} />
               {contact.email}
+            </p>
+            <p className="flex items-center gap-3">
+              <Globe className="text-muted" size={17} />
+              {contact.website}
             </p>
             <p className="flex items-center gap-3">
               <MapPin className="text-muted" size={17} />
@@ -111,26 +139,37 @@ export function SettingsView({ data }: { data: DemoData }) {
         onOpenChange={setConfirmReset}
         title="¿Reiniciar todos los datos?"
         description="Se eliminarán los cambios y se restaurarán los datos iniciales."
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmReset(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                await reset();
+                setConfirmReset(false);
+              }}
+            >
+              <RefreshCcw size={16} /> Sí, reiniciar
+            </Button>
+          </>
+        }
       >
         <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
           Esta acción elimina reservas, clientes, cambios de profesores y
           facturas creadas después de la configuración inicial.
         </div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setConfirmReset(false)}>
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            onClick={async () => {
-              await reset();
-              setConfirmReset(false);
-            }}
-          >
-            <RefreshCcw size={16} /> Sí, reiniciar
-          </Button>
-        </div>
       </Dialog>
+    </div>
+  );
+}
+
+function Rule({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-line bg-white/65 p-3">
+      <span className="block text-xs text-muted">{label}</span>
+      <strong className="mt-1 block text-sm">{value}</strong>
     </div>
   );
 }

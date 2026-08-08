@@ -2,14 +2,25 @@
 
 import {
   CalendarXIcon as CalendarX2,
+  CheckCircleIcon as CheckCircle,
+  ClockIcon as Clock,
+  CreditCardIcon as CreditCard,
+  DownloadSimpleIcon as Download,
+  ReceiptIcon as Receipt,
   MagnifyingGlassIcon as Search,
+  UserCircleIcon as UserCircle,
 } from "@phosphor-icons/react";
-import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { updateBookingStatus } from "~/application/manage-demo";
 import { Badge } from "~/components/ui/badge";
+import { Dialog } from "~/components/ui/dialog";
 import { EmptyState } from "~/components/ui/states";
 import type { BookingStatus, DemoData } from "~/domain/models";
 import { useDemo } from "~/infrastructure/state/demo-store";
+import { downloadCustomerInvoicePdf } from "~/lib/customer-invoice-pdf";
 import {
   bookingStatusLabels,
   formatDate,
@@ -29,12 +40,29 @@ const statusTone: Record<
   no_show: "neutral",
 };
 
-export function BookingsView({ data }: { data: DemoData }) {
+export function BookingsView({
+  data,
+  clientId,
+}: {
+  data: DemoData;
+  clientId?: string;
+}) {
   const { commit } = useDemo();
-  const [query, setQuery] = useState("");
+  const router = useRouter();
+  const selectedClient = data.students.find(
+    (student) => student.id === clientId,
+  );
+  const selectedClientName = selectedClient?.name ?? "";
+  const [query, setQuery] = useState(selectedClientName);
   const [teacher, setTeacher] = useState("all");
   const [status, setStatus] = useState("all");
   const [type, setType] = useState("all");
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null,
+  );
+  useEffect(() => {
+    setQuery(selectedClientName);
+  }, [selectedClientName]);
   const filtered = [...data.bookings]
     .sort((a, b) => b.startsAt.localeCompare(a.startsAt))
     .filter((booking) => {
@@ -42,22 +70,38 @@ export function BookingsView({ data }: { data: DemoData }) {
         (item) => item.id === booking.studentId,
       );
       return (
+        (!clientId || booking.studentId === clientId) &&
         (teacher === "all" || booking.teacherId === teacher) &&
         (status === "all" || booking.status === status) &&
         (type === "all" || booking.type === type) &&
         (!query || student?.name.toLowerCase().includes(query.toLowerCase()))
       );
     });
+  const selectedBooking = data.bookings.find(
+    (booking) => booking.id === selectedBookingId,
+  );
   return (
     <div>
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">
-            Todas las reservas
+            {selectedClient
+              ? `Reservas de ${selectedClient.name}`
+              : "Todas las reservas"}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Consulta y actualiza el estado operativo.
+            {selectedClient
+              ? "Consulta el historial completo de este cliente."
+              : "Consulta y actualiza el estado operativo."}
           </p>
+          {selectedClient ? (
+            <Link
+              href="/admin/reservas"
+              className="mt-2 inline-flex text-xs font-semibold text-forest hover:underline"
+            >
+              Quitar filtro de cliente
+            </Link>
+          ) : null}
         </div>
         <Badge>{filtered.length} resultados</Badge>
       </div>
@@ -65,8 +109,13 @@ export function BookingsView({ data }: { data: DemoData }) {
         <label className="relative">
           <Search className="absolute top-3 left-3 text-muted" size={16} />
           <input
+            type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              if (!event.target.value && clientId)
+                router.replace("/admin/reservas", { scroll: false });
+            }}
             placeholder="Buscar cliente…"
             aria-label="Buscar cliente"
             className="min-h-10 w-full rounded-xl border border-line bg-white pr-3 pl-9 text-sm outline-none focus:ring-3 focus:ring-forest/10"
@@ -105,6 +154,7 @@ export function BookingsView({ data }: { data: DemoData }) {
                 <th className="px-4 py-4">Pago</th>
                 <th className="px-4 py-4">Importe</th>
                 <th className="px-4 py-4">Estado</th>
+                <th className="px-4 py-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -117,6 +167,9 @@ export function BookingsView({ data }: { data: DemoData }) {
                 );
                 const activity = data.activities.find(
                   (item) => item.id === booking.activityId,
+                );
+                const invoice = data.customerInvoices.find(
+                  (item) => item.bookingId === booking.id,
                 );
                 return (
                   <tr
@@ -184,6 +237,27 @@ export function BookingsView({ data }: { data: DemoData }) {
                         )}
                       </select>
                     </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-1">
+                        {invoice ? (
+                          <button
+                            type="button"
+                            onClick={() => downloadCustomerInvoicePdf(invoice)}
+                            aria-label={`Descargar factura ${invoice.number}`}
+                            className="rounded-lg px-2.5 py-2 text-xs font-semibold text-forest transition-colors hover:bg-forest/8"
+                          >
+                            <Download size={14} />
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedBookingId(booking.id)}
+                          className="rounded-lg px-2.5 py-2 text-xs font-semibold text-forest transition-colors hover:bg-forest/8"
+                        >
+                          Abrir
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -199,6 +273,184 @@ export function BookingsView({ data }: { data: DemoData }) {
           />
         </div>
       )}
+      <Dialog
+        open={Boolean(selectedBooking)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBookingId(null);
+        }}
+        title="Detalle de reserva"
+        description="La ficha operativa que conecta cliente, agenda, pago y liquidación."
+      >
+        {selectedBooking ? (
+          <BookingDetail data={data} booking={selectedBooking} />
+        ) : null}
+      </Dialog>
+    </div>
+  );
+}
+
+function BookingDetail({
+  data,
+  booking,
+}: {
+  data: DemoData;
+  booking: DemoData["bookings"][number];
+}) {
+  const student = data.students.find((item) => item.id === booking.studentId);
+  const teacher = data.teachers.find((item) => item.id === booking.teacherId);
+  const activity = data.activities.find(
+    (item) => item.id === booking.activityId,
+  );
+  const compensation = data.compensationLines.find(
+    (item) => item.bookingId === booking.id,
+  );
+  const invoice = data.customerInvoices.find(
+    (item) => item.bookingId === booking.id,
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-forest p-5 text-white">
+        <p className="text-xs text-white/55">
+          {activity?.name ?? "Clase privada"}
+        </p>
+        <h3 className="mt-1 text-xl font-semibold">{student?.name}</h3>
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-white/75">
+          <span>
+            {formatDate(booking.startsAt, { day: "numeric", month: "long" })}
+          </span>
+          <span>
+            {formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}
+          </span>
+          <span>
+            {booking.playerCount} jugador{booking.playerCount > 1 ? "es" : ""}
+          </span>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DetailItem
+          icon={<UserCircle size={17} />}
+          label="Profesor"
+          value={teacher?.name ?? "Sin asignar"}
+        />
+        <DetailItem
+          icon={<CheckCircle size={17} />}
+          label="Estado"
+          value={bookingStatusLabels[booking.status]}
+        />
+        <DetailItem
+          icon={<CreditCard size={17} />}
+          label="Pago"
+          value={`${paymentLabels[booking.paymentMethod]} · ${booking.paymentStatus === "paid" ? "Cobrado" : "Pendiente"}`}
+        />
+        <DetailItem
+          icon={<Receipt size={17} />}
+          label="Compensación"
+          value={
+            compensation
+              ? `${formatMoney(compensation.amount)} · ${compensation.status === "pending" ? "Pendiente" : "Liquidada"}`
+              : "No generada"
+          }
+        />
+      </div>
+      <div className="rounded-2xl border border-line bg-white/70 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold">Factura del cliente</h3>
+            <p className="mt-1 text-xs text-muted">
+              {invoice
+                ? `${invoice.number} · ${invoice.delivery.status === "sent" ? `Enviada a ${invoice.delivery.toEmail}` : "Configura el email fiscal del profesor"}`
+                : "La factura no está disponible para esta reserva."}
+            </p>
+          </div>
+          {invoice ? (
+            <button
+              type="button"
+              onClick={() => downloadCustomerInvoicePdf(invoice)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-forest px-3 text-xs font-semibold text-white transition hover:bg-forest-light"
+            >
+              <Download size={14} /> Descargar PDF
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold">Trazabilidad</h3>
+        <div className="mt-3 space-y-3">
+          <TraceItem
+            title="Reserva creada"
+            detail="Entrada recibida desde el portal de booking."
+            done
+          />
+          <TraceItem
+            title="Agenda del profesor"
+            detail={`Bloque reservado para ${teacher?.name ?? "el profesor"}.`}
+            done
+          />
+          <TraceItem
+            title={
+              booking.paymentStatus === "paid"
+                ? "Pago confirmado"
+                : "Pago pendiente"
+            }
+            detail={
+              booking.paymentStatus === "paid"
+                ? "Pago online simulado en la demo."
+                : "Se cobrará presencialmente."
+            }
+            done={booking.paymentStatus === "paid"}
+          />
+          <TraceItem
+            title="Aviso al cliente"
+            detail="WhatsApp preparado · integración pendiente."
+            done
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-line bg-white/70 p-3">
+      <div className="flex items-center gap-2 text-xs text-muted">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <strong className="mt-2 block text-sm">{value}</strong>
+    </div>
+  );
+}
+
+function TraceItem({
+  title,
+  detail,
+  done,
+}: {
+  title: string;
+  detail: string;
+  done: boolean;
+}) {
+  return (
+    <div className="flex gap-3">
+      <span
+        className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${done ? "bg-forest text-white" : "bg-sand text-muted"}`}
+      >
+        {done ? <CheckCircle size={14} weight="fill" /> : <Clock size={14} />}
+      </span>
+      <div>
+        <strong className="block text-sm">{title}</strong>
+        <p className="mt-0.5 text-xs text-muted">{detail}</p>
+      </div>
     </div>
   );
 }

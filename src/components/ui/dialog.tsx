@@ -27,7 +27,7 @@ export function Dialog({
       <BaseDialog.Portal>
         <BaseDialog.Backdrop className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[2px] transition-opacity data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <BaseDialog.Popup className="fixed top-1/2 left-1/2 z-50 flex max-h-[90dvh] w-[min(92vw,560px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[24px] border border-white/70 bg-canvas shadow-[0_28px_90px_rgba(28,38,31,.24)] outline-none transition data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
-          <header className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
+          <header className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-6 py-5">
             <div>
               <BaseDialog.Title className="text-xl font-semibold tracking-tight text-ink">
                 {title}
@@ -44,9 +44,11 @@ export function Dialog({
               <X size={18} />
             </BaseDialog.Close>
           </header>
-          <div className="overflow-y-auto px-6 py-5">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            {children}
+          </div>
           {footer ? (
-            <footer className="flex justify-end gap-2 border-t border-line bg-white/60 px-6 py-4">
+            <footer className="flex shrink-0 justify-end gap-2 border-t border-line bg-white/85 px-6 py-4 backdrop-blur">
               {footer}
             </footer>
           ) : null}

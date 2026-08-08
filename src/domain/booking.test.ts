@@ -5,6 +5,7 @@ import {
   getAvailableSlots,
   getAvailableTeacherSlots,
   overlaps,
+  resolveCustomerPrice,
 } from "~/domain/booking";
 import { createSeed } from "~/infrastructure/seed";
 import { addDays, localDateKey } from "~/lib/dates";
@@ -78,7 +79,12 @@ describe("booking domain", () => {
       playerCount: 2,
       memberType: "unknown",
       paymentMethod: "in_person",
-      customer: { name: "Ana Demo", email: "ana@example.com" },
+      customer: {
+        name: "Ana Demo",
+        email: "ana@example.com",
+        fiscalId: "12345678Z",
+        fiscalAddress: "C/ Demo, 1 · 07001 Palma",
+      },
     });
     const booking = result.bookings.at(-1);
     expect(booking).toBeDefined();
@@ -87,6 +93,28 @@ describe("booking domain", () => {
     expect(booking.customerPrice).toBe(150);
     expect(booking.paymentStatus).toBe("pending");
     expect(result.compensationLines.at(-1)?.bookingId).toBe(booking.id);
+    expect(result.customerInvoices.at(-1)).toMatchObject({
+      bookingId: booking.id,
+      total: booking.customerPrice,
+      vatRate: 21,
+      delivery: { status: "sent" },
+    });
+  });
+
+  it("derives private lesson prices from the teacher category", () => {
+    const teacher = createSeed().teachers.find(
+      (item) => item.id === "teacher-toni",
+    );
+    if (!teacher) throw new Error("Expected a seeded teacher");
+
+    expect(resolveCustomerPrice(undefined, teacher, "unknown")).toBe(150);
+    expect(
+      resolveCustomerPrice(
+        undefined,
+        { ...teacher, category: "teacher" },
+        "unknown",
+      ),
+    ).toBe(85);
   });
 
   it("links an authenticated account and refreshes its saved profile", () => {
@@ -106,6 +134,8 @@ describe("booking domain", () => {
         name: "Lucía Actualizada",
         email: "lucia@example.com",
         phone: "+34 611 111 111",
+        fiscalId: "12345678Z",
+        fiscalAddress: "C/ Actualizada, 1 · 07001 Palma",
       },
     });
 
@@ -133,7 +163,12 @@ describe("booking domain", () => {
         playerCount: 1,
         memberType: "unknown",
         paymentMethod: "in_person",
-        customer: { name: "Ana Demo", email: "ana@example.com" },
+        customer: {
+          name: "Ana Demo",
+          email: "ana@example.com",
+          fiscalId: "12345678Z",
+          fiscalAddress: "C/ Demo, 1 · 07001 Palma",
+        },
       }),
     ).toThrow(BookingError);
     expect(availablePlaces(activity, data.bookings)).toBe(

@@ -1,9 +1,4 @@
-import type {
-  Booking,
-  CompensationLine,
-  DemoData,
-  TeacherInvoice,
-} from "./models";
+import type { Booking, CompensationLine, DemoData } from "./models";
 
 export function isBookingBillable(booking: Booking, noShowBillable: boolean) {
   return (
@@ -18,11 +13,6 @@ export function generateMonthlyInvoices(
   period: string,
   now = new Date().toISOString(),
 ) {
-  const existingTeachers = new Set(
-    data.invoices
-      .filter((invoice) => invoice.period === period)
-      .map((invoice) => invoice.teacherId),
-  );
   const eligibleLines = data.compensationLines.filter((line) => {
     const booking = data.bookings.find((item) => item.id === line.bookingId);
     return (
@@ -32,22 +22,51 @@ export function generateMonthlyInvoices(
     );
   });
   const byTeacher = Map.groupBy(eligibleLines, (line) => line.teacherId);
-  const invoices: TeacherInvoice[] = [];
+  let invoices = data.invoices;
   for (const [teacherId, lines] of byTeacher) {
-    if (existingTeachers.has(teacherId)) continue;
-    invoices.push({
-      id: makeId("inv"),
-      teacherId,
-      period,
-      lineIds: lines.map((line) => line.id),
-      bookingIds: lines.map((line) => line.bookingId),
-      hours: round(lines.reduce((total, line) => total + line.hours, 0)),
-      amount: round(lines.reduce((total, line) => total + line.amount, 0)),
-      status: "generated",
-      createdAt: now,
-    });
+    const hours = round(lines.reduce((total, line) => total + line.hours, 0));
+    const amount = round(lines.reduce((total, line) => total + line.amount, 0));
+    const existingInvoice = invoices.find(
+      (invoice) =>
+        invoice.teacherId === teacherId &&
+        invoice.period === period &&
+        invoice.status === "generated",
+    );
+
+    if (existingInvoice) {
+      invoices = invoices.map((invoice) =>
+        invoice.id === existingInvoice.id
+          ? {
+              ...invoice,
+              lineIds: [...invoice.lineIds, ...lines.map((line) => line.id)],
+              bookingIds: [
+                ...invoice.bookingIds,
+                ...lines.map((line) => line.bookingId),
+              ],
+              hours: round(invoice.hours + hours),
+              amount: round(invoice.amount + amount),
+            }
+          : invoice,
+      );
+      continue;
+    }
+
+    invoices = [
+      ...invoices,
+      {
+        id: makeId("inv"),
+        teacherId,
+        period,
+        lineIds: lines.map((line) => line.id),
+        bookingIds: lines.map((line) => line.bookingId),
+        hours,
+        amount,
+        status: "generated",
+        createdAt: now,
+      },
+    ];
   }
-  const generatedIds = new Set(invoices.flatMap((invoice) => invoice.lineIds));
+  const generatedIds = new Set(eligibleLines.map((line) => line.id));
   return {
     ...data,
     compensationLines: data.compensationLines.map((line) =>
@@ -55,7 +74,7 @@ export function generateMonthlyInvoices(
         ? { ...line, status: "generated" as const }
         : line,
     ),
-    invoices: [...data.invoices, ...invoices],
+    invoices,
   };
 }
 

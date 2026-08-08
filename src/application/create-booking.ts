@@ -5,6 +5,7 @@ import {
   isTeacherBusy,
   resolveCustomerPrice,
 } from "~/domain/booking";
+import { createCustomerInvoice } from "~/domain/customer-invoices";
 import type { Booking, DemoData, MockPayment, Student } from "~/domain/models";
 import { customerSchema } from "~/domain/schemas";
 
@@ -80,8 +81,8 @@ export function createBooking(
     ...bookingInput,
     studentId: student.id,
     customerPrice,
-    compensationRate: teacher.compensationRate,
-    teacherCompensation: round(teacher.compensationRate * hours),
+    compensationRate: customerPrice,
+    teacherCompensation: round(customerPrice * hours),
     status: "confirmed",
     paymentStatus: input.paymentMethod === "online" ? "paid" : "pending",
     createdAt: now,
@@ -94,6 +95,14 @@ export function createBooking(
     status: booking.paymentStatus,
     createdAt: now,
   };
+  const customerInvoice = createCustomerInvoice(
+    data,
+    booking,
+    student,
+    teacher,
+    activity,
+    now,
+  );
   return {
     ...data,
     students: existingStudent
@@ -101,6 +110,7 @@ export function createBooking(
       : [...data.students, student],
     bookings: [...data.bookings, booking],
     payments: [...data.payments, payment],
+    customerInvoices: [...data.customerInvoices, customerInvoice],
     compensationLines: [
       ...data.compensationLines,
       createCompensationLine(booking),

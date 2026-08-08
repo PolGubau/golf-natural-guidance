@@ -967,8 +967,9 @@ La web publica:
 
 - Teléfono general: `+34 678 808 435`.
 - Email general: `info@golfnaturalguidance.com`.
-- Ubicación: Arabella Golf Resort / Golf Son Muntaner.
-- Dirección: C/ Miquel Lladó, s/n, 07013 Palma, Mallorca.
+- Web informativa: `www.golfnaturalguidance.com`.
+- Ubicación: Club de Golf Son Muntaner.
+- Dirección: C/ Club de Golf Son Muntaner, Calle Miquel Lladó, s/n, 07013 Palma.
 
 El CRM contiene además los datos del lead Toni Planells:
 

@@ -117,6 +117,8 @@ export function BookingExperience() {
       name: profile?.name ?? session.user.name,
       email: profile?.email ?? session.user.email,
       phone: profile?.phone ?? "",
+      fiscalId: profile?.fiscalId ?? "",
+      fiscalAddress: profile?.fiscalAddress ?? "",
     };
   };
   const continueFromSchedule = () => {

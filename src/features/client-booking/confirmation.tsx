@@ -1,9 +1,15 @@
 import {
   ArrowRightIcon as ArrowRight,
+  CalendarIcon as Calendar,
   CalendarCheckIcon as CalendarCheck2,
+  ChatCircleTextIcon as ChatCircleText,
   CheckIcon as Check,
+  CreditCardIcon as CreditCard,
+  ReceiptIcon as Receipt,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import type { DemoData } from "~/domain/models";
 import { formatDate, formatTime } from "~/lib/format";
@@ -20,6 +26,13 @@ export function Confirmation({
 }) {
   const teacher = data.teachers.find((item) => item.id === draft.teacherId);
   const activity = data.activities.find((item) => item.id === draft.activityId);
+  const booking = [...data.bookings]
+    .filter(
+      (item) =>
+        item.teacherId === draft.teacherId && item.startsAt === draft.startsAt,
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  const isPaid = booking?.paymentStatus === "paid";
   return (
     <main className="mx-auto grid min-h-[calc(100dvh-90px)] max-w-3xl place-items-center px-5 py-12">
       <div className="surface w-full overflow-hidden rounded-[30px] text-center">
@@ -55,6 +68,46 @@ export function Confirmation({
             </p>
           </div>
         </div>
+        <div className="border-t border-line bg-sand/35 px-7 py-7 text-left">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">
+                Todo listo para la academia
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-muted">
+                La reserva ya ha pasado por los pasos que normalmente haría el
+                equipo.
+              </p>
+            </div>
+            <Badge tone="success">Demo operativa</Badge>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <ConnectionStep
+              icon={<Calendar size={18} />}
+              title="Agenda actualizada"
+              detail={`La clase aparece en la agenda de ${teacher?.name ?? "tu profesor"}.`}
+            />
+            <ConnectionStep
+              icon={<CreditCard size={18} />}
+              title={isPaid ? "Pago registrado" : "Pago presencial pendiente"}
+              detail={
+                isPaid
+                  ? "La plaza queda confirmada con el pago online simulado."
+                  : "La clase se cobrará en la academia, tal como has elegido."
+              }
+            />
+            <ConnectionStep
+              icon={<Receipt size={18} />}
+              title="Factura generada"
+              detail="La factura de la reserva queda disponible para el profesor y el equipo administrativo."
+            />
+            <ConnectionStep
+              icon={<ChatCircleText size={18} />}
+              title="Factura enviada al profesor"
+              detail="El envío al email fiscal se registra como simulado en esta demo local."
+            />
+          </div>
+        </div>
         <div className="flex flex-col justify-center gap-3 border-t border-line bg-white/55 p-6 sm:flex-row">
           <Button onClick={onRestart} variant="secondary">
             <CalendarCheck2 size={17} /> Hacer otra reserva
@@ -68,5 +121,27 @@ export function Confirmation({
         </div>
       </div>
     </main>
+  );
+}
+
+function ConnectionStep({
+  icon,
+  title,
+  detail,
+}: {
+  icon: ReactNode;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-line/80 bg-white/80 p-4">
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
+        {icon}
+      </span>
+      <div>
+        <strong className="block text-sm">{title}</strong>
+        <p className="mt-1 text-xs leading-5 text-muted">{detail}</p>
+      </div>
+    </div>
   );
 }

@@ -42,7 +42,13 @@ export function DetailsStep({
     formState: { errors },
   } = useForm<CustomerForm>({
     resolver: zodResolver(customerSchema),
-    defaultValues: draft.customer ?? { name: "", email: "", phone: "" },
+    defaultValues: draft.customer ?? {
+      name: "",
+      email: "",
+      phone: "",
+      fiscalId: "",
+      fiscalAddress: "",
+    },
   });
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -96,6 +102,20 @@ export function DetailsStep({
             autoComplete="tel"
             placeholder="+34 600 000 000"
             {...register("phone")}
+          />
+        </Field>
+        <Field label="NIF, NIE o CIF" error={errors.fiscalId?.message}>
+          <Input
+            autoComplete="off"
+            placeholder="12345678Z"
+            {...register("fiscalId")}
+          />
+        </Field>
+        <Field label="Dirección fiscal" error={errors.fiscalAddress?.message}>
+          <Input
+            autoComplete="street-address"
+            placeholder="Calle, número, código postal y localidad"
+            {...register("fiscalAddress")}
           />
         </Field>
         <Field label="¿Qué quieres trabajar?">

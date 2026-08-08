@@ -13,6 +13,30 @@ export function AgendaView({ data }: { data: DemoData }) {
   const days = Array.from({ length: 7 }, (_, index) =>
     addDays(new Date(), index),
   );
+  const selectedTeacher = data.teachers.find(
+    (item) => item.id === teacherFilter,
+  );
+  const selectedBookings = selectedTeacher
+    ? data.bookings.filter(
+        (booking) =>
+          booking.teacherId === selectedTeacher.id &&
+          booking.status !== "cancelled",
+      )
+    : [];
+  const selectedHours = selectedBookings.reduce(
+    (sum, booking) =>
+      sum +
+      (new Date(booking.endsAt).getTime() -
+        new Date(booking.startsAt).getTime()) /
+        3_600_000,
+    0,
+  );
+  const pendingCompensation = data.compensationLines
+    .filter(
+      (line) =>
+        selectedTeacher?.id === line.teacherId && line.status === "pending",
+    )
+    .reduce((sum, line) => sum + line.amount, 0);
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -67,6 +91,50 @@ export function AgendaView({ data }: { data: DemoData }) {
             ))}
         </div>
       </div>
+      {selectedTeacher ? (
+        <section className="surface mt-5 flex flex-col gap-4 rounded-[22px] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="size-12 overflow-hidden rounded-2xl"
+              style={{ backgroundColor: selectedTeacher.color }}
+            >
+              {selectedTeacher.photoUrl ? (
+                <Image
+                  src={selectedTeacher.photoUrl}
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <span className="grid size-full place-items-center font-semibold text-white">
+                  {initials(selectedTeacher.name)}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold">{selectedTeacher.name}</h3>
+              <p className="text-xs text-muted">
+                {selectedTeacher.publicRole} · {selectedTeacher.category}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-5 text-left sm:text-right">
+            <SummaryMetric
+              label="Sesiones"
+              value={String(selectedBookings.length)}
+            />
+            <SummaryMetric
+              label="Horas"
+              value={`${selectedHours.toFixed(1)} h`}
+            />
+            <SummaryMetric
+              label="Pendiente"
+              value={`${pendingCompensation.toFixed(0)} €`}
+            />
+          </div>
+        </section>
+      ) : null}
       <div className="mt-5 grid gap-3 xl:grid-cols-7">
         {days.map((day, index) => {
           const key = localDateKey(day);
@@ -174,6 +242,15 @@ export function AgendaView({ data }: { data: DemoData }) {
         Las actividades ocupan una única franja en la agenda aunque tengan
         varias inscripciones. Las reservas canceladas liberan disponibilidad.
       </div>
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="block text-[10px] text-muted">{label}</span>
+      <strong className="mt-1 block text-sm">{value}</strong>
     </div>
   );
 }

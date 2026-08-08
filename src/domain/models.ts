@@ -1,4 +1,10 @@
 export type TeacherCategory = "teacher" | "head_teacher" | "master_teacher";
+
+export const teacherCategoryCustomerPrices: Record<TeacherCategory, number> = {
+  teacher: 85,
+  head_teacher: 85,
+  master_teacher: 150,
+};
 export type ProductType =
   | "private_lesson"
   | "private_package"
@@ -28,10 +34,14 @@ export type Teacher = {
   id: string;
   name: string;
   photoUrl?: string;
+  email?: string;
+  phone?: string;
+  fiscalName: string;
+  fiscalId: string;
+  fiscalAddress: string;
+  invoiceSeries: string;
   publicRole: string;
   category: TeacherCategory;
-  customerPrice: number;
-  compensationRate: number;
   active: boolean;
   availability: AvailabilityRule[];
   color: string;
@@ -72,6 +82,8 @@ export type Student = {
   name: string;
   email: string;
   phone?: string;
+  fiscalId: string;
+  fiscalAddress: string;
 };
 
 export type Booking = {
@@ -127,13 +139,47 @@ export type TeacherInvoice = {
   createdAt: string;
 };
 
+export type CustomerInvoice = {
+  id: string;
+  number: string;
+  bookingId: string;
+  teacherId: string;
+  studentId: string;
+  issuer: {
+    name: string;
+    taxId: string;
+    address: string;
+  };
+  recipient: {
+    name: string;
+    taxId: string;
+    address: string;
+  };
+  serviceName: string;
+  issuedAt: string;
+  subtotal: number;
+  vatRate: number;
+  vatAmount: number;
+  total: number;
+  delivery: {
+    status: "sent" | "needs_recipient";
+    toEmail?: string;
+    sentAt?: string;
+  };
+};
+
 export type DemoSettings = {
   timezone: "Europe/Madrid";
   currency: "EUR";
   slotIntervalMinutes: number;
   privateLessonDuration: number;
   noShowBillable: boolean;
-  academyContact: { phone: string; email: string; location: string };
+  academyContact: {
+    phone: string;
+    email: string;
+    website: string;
+    location: string;
+  };
 };
 
 export type DemoData = {
@@ -145,5 +191,6 @@ export type DemoData = {
   payments: MockPayment[];
   compensationLines: CompensationLine[];
   invoices: TeacherInvoice[];
+  customerInvoices: CustomerInvoice[];
   settings: DemoSettings;
 };

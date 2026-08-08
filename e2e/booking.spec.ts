@@ -178,7 +178,8 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
   await loginAsToni(page);
-  await page.getByRole("button", { name: "Reservas" }).click();
+  await page.getByRole("link", { name: "Reservas", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin\/reservas$/);
   await expect(page.getByText("Cliente E2E").first()).toBeVisible();
   await expect(page.getByText(/En persona · Pendiente/)).toBeVisible();
 });
@@ -188,7 +189,13 @@ test("group activity only offers online payment and consumes a place", async ({
 }) => {
   await page.goto("/booking");
   await page.getByRole("button", { name: /Quiero una actividad/ }).click();
-  await page.getByRole("button", { name: /Swing Lab/ }).click();
+  const swingLab = page.getByRole("button", { name: /Swing Lab/ });
+  await expect(swingLab).toContainText(
+    "Sesión de análisis técnico con vídeo y feedback personalizado.",
+  );
+  await expect(swingLab).toContainText(/plazas disponibles/);
+  await expect(swingLab).toContainText("por persona");
+  await swingLab.click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: "Continuar con Google" }).click();
   await page.getByLabel("Nombre y apellidos").fill("Grupo E2E");
@@ -203,6 +210,9 @@ test("group activity only offers online payment and consumes a place", async ({
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
   await loginAsToni(page);
-  await page.getByRole("button", { name: "Cursos y actividades" }).click();
+  await page
+    .getByRole("link", { name: "Cursos y actividades", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/admin\/actividades$/);
   await expect(page.getByText("1/6")).toBeVisible();
 });
