@@ -24,10 +24,46 @@ type Props = {
   onChange: (patch: Partial<BookingDraft>) => void;
 };
 
+type BookingSection = "private" | "activities" | "junior" | "packages";
+
+const bookingSections: ReadonlyArray<{
+  value: BookingSection;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "private",
+    label: "Clases privadas",
+    description: "Reserva una sesión a tu medida",
+  },
+  {
+    value: "activities",
+    label: "Cursos y actividades",
+    description: "Experiencias con fecha y plazas",
+  },
+  {
+    value: "junior",
+    label: "Junior Academy",
+    description: "Programas para jóvenes",
+  },
+  {
+    value: "packages",
+    label: "Bonos y programas",
+    description: "Opciones para entrenar con continuidad",
+  },
+];
+
+const resetSelection: Partial<BookingDraft> = {
+  discoveryMode: null,
+  mode: null,
+  teacherId: "",
+  activityId: undefined,
+  startsAt: "",
+  endsAt: "",
+};
+
 export function ServiceStep({ data, draft, onChange }: Props) {
-  const [section, setSection] = useState<
-    "private" | "activities" | "junior" | "packages"
-  >("private");
+  const [section, setSection] = useState<BookingSection>("private");
   const activeTeachers = data.teachers.filter((teacher) => teacher.active);
   const activities = data.activities.filter(
     (activity) => activity.active && new Date(activity.endsAt) > new Date(),
@@ -46,24 +82,31 @@ export function ServiceStep({ data, draft, onChange }: Props) {
         ? !activity.name.toLowerCase().includes("junior")
         : true,
   );
+  const selectSection = (next: BookingSection) => {
+    setSection(next);
+    onChange(resetSelection);
+  };
   const revealDetails = (patch: Partial<BookingDraft>) => {
     onChange(patch);
     requestAnimationFrame(() => {
-      detailsRef.current?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-        block: "start",
+      requestAnimationFrame(() => {
+        detailsRef.current?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+        detailsRef.current?.focus({ preventScroll: true });
       });
-      detailsRef.current?.focus({ preventScroll: true });
     });
   };
   return (
     <div className="space-y-8">
       <section>
-        <div className="mb-5">
+        <div className="mb-7 flex items-end justify-between gap-6">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[.16em] text-coral">
+            <p className="mb-2 text-sm font-medium text-coral">
               Reserva online
             </p>
             <h2 className="text-2xl font-semibold tracking-tight">
@@ -73,35 +116,95 @@ export function ServiceStep({ data, draft, onChange }: Props) {
               Dinos cuándo te viene bien y te enseñaremos las mejores opciones.
             </p>
           </div>
+          <div className="hidden items-center gap-3 sm:flex">
+            <div className="flex -space-x-2">
+              {activeTeachers.slice(0, 4).map((teacher) => (
+                <span
+                  key={teacher.id}
+                  className="relative size-8 overflow-hidden rounded-full border-2 border-white bg-sand"
+                  title={teacher.name}
+                >
+                  {teacher.photoUrl ? (
+                    <Image
+                      src={teacher.photoUrl}
+                      alt=""
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </span>
+              ))}
+            </div>
+            <span className="text-xs text-muted">Nuestro equipo</span>
+          </div>
         </div>
-        <nav
-          className="scrollbar-none mb-7 flex gap-2 overflow-x-auto pb-1"
-          aria-label="Categorías de reserva"
-        >
-          {(
-            [
-              ["private", "Clases privadas"],
-              ["activities", "Cursos y actividades"],
-              ["junior", "Junior Academy"],
-              ["packages", "Bonos y programas"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              aria-pressed={section === value}
-              onClick={() => setSection(value)}
-              className={cn(
-                "whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-semibold transition",
-                section === value
-                  ? "border-forest bg-forest text-white"
-                  : "border-line bg-white text-muted hover:border-forest/30 hover:text-ink",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
+        <div className="mb-7 border-y border-line py-5">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-sm font-medium text-ink">
+              ¿Qué quieres reservar?
+            </p>
+          </div>
+          <div
+            className="grid gap-3 sm:grid-cols-2"
+            aria-label="Categorías de reserva"
+            role="tablist"
+          >
+            {bookingSections.map(({ value, label, description }, index) => {
+              const image = activeTeachers[
+                value === "private"
+                  ? 0
+                  : value === "activities"
+                    ? 1
+                    : value === "junior"
+                      ? 2
+                      : 3
+              ]?.photoUrl;
+              return (
+                <button
+                  type="button"
+                  key={value}
+                  id={`booking-tab-${value}`}
+                  role="tab"
+                  aria-selected={section === value}
+                  onClick={() => selectSection(value)}
+                  className={cn(
+                    "group relative isolate min-h-32 overflow-hidden rounded-xl text-left text-white transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60",
+                    value === "private" && "sm:col-span-2 sm:min-h-40",
+                    section === value
+                      ? "shadow-lg shadow-forest/15 ring-2 ring-coral/70"
+                      : "shadow-sm hover:shadow-lg hover:shadow-forest/10",
+                  )}
+                >
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      sizes={value === "private" ? "700px" : "350px"}
+                      className="absolute inset-0 -z-20 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  ) : null}
+                  <span className="absolute inset-0 -z-10 bg-gradient-to-t from-forest/95 via-forest/45 to-forest/10" />
+                  <span className="absolute top-4 right-4 grid size-6 place-items-center rounded-full border border-white/60 bg-black/10 text-transparent backdrop-blur-sm transition-colors duration-200 group-hover:border-white group-hover:text-white">
+                    <Check size={14} weight="bold" />
+                  </span>
+                  <span className="absolute right-4 bottom-4 left-4 block">
+                    <span className="mb-2 block text-[10px] font-medium tracking-[.08em] text-white/65">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="block text-base font-semibold tracking-tight sm:text-lg">
+                      {label}
+                    </span>
+                    <span className="mt-1 block max-w-[34rem] text-xs leading-5 text-white/75">
+                      {description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
         {section === "private" ? (
           <>
             <div className="mb-3">
@@ -110,20 +213,17 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                 aria-pressed={draft.discoveryMode === "schedule_first"}
                 onClick={() =>
                   revealDetails({
+                    ...resetSelection,
                     discoveryMode: "schedule_first",
                     mode: "private_lesson",
                     productId: "product-private",
-                    teacherId: "",
-                    activityId: undefined,
-                    startsAt: "",
-                    endsAt: "",
                   })
                 }
                 className={cn(
-                  "group relative w-full overflow-hidden rounded-[1.5rem] border p-5 text-left transition sm:p-7",
+                  "group relative w-full overflow-hidden rounded-xl border p-5 text-left transition sm:p-7",
                   draft.discoveryMode === "schedule_first"
-                    ? "border-forest bg-forest text-white shadow-xl shadow-forest/10"
-                    : "border-forest/15 bg-gradient-to-br from-sand via-white to-white hover:-translate-y-0.5 hover:border-forest/35 hover:shadow-xl",
+                    ? "border-forest bg-forest text-white shadow-md shadow-forest/10"
+                    : "border-forest/15 bg-sand hover:border-forest/35 hover:shadow-md",
                 )}
               >
                 <span className="absolute -right-8 -bottom-14 size-44 rounded-full bg-coral/15 transition group-hover:scale-110" />
@@ -170,12 +270,8 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                 aria-pressed={draft.discoveryMode === "teacher_first"}
                 onClick={() =>
                   onChange({
+                    ...resetSelection,
                     discoveryMode: "teacher_first",
-                    mode: null,
-                    teacherId: "",
-                    activityId: undefined,
-                    startsAt: "",
-                    endsAt: "",
                   })
                 }
                 className={cn(
@@ -201,14 +297,13 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                 type="button"
                 aria-pressed={draft.discoveryMode === "activity_first"}
                 onClick={() =>
-                  onChange({
-                    discoveryMode: "activity_first",
-                    mode: null,
-                    teacherId: "",
-                    activityId: undefined,
-                    startsAt: "",
-                    endsAt: "",
-                  })
+                  (() => {
+                    selectSection("activities");
+                    onChange({
+                      ...resetSelection,
+                      discoveryMode: "activity_first",
+                    });
+                  })()
                 }
                 className={cn(
                   "border-b py-4 text-left transition hover:border-forest",
@@ -230,34 +325,36 @@ export function ServiceStep({ data, draft, onChange }: Props) {
             </div>
           </>
         ) : null}
-        <div className="mb-3 flex items-end justify-between gap-4">
-          <div>
-            <h3 className="font-semibold">
-              {section === "packages"
-                ? "Bonos y programas"
-                : section === "junior"
-                  ? "Junior Academy"
-                  : "Próximas actividades"}
-            </h3>
-            <p className="mt-1 text-sm text-muted">
-              {section === "packages"
-                ? "Los bonos y programas se podrán configurar desde el backoffice."
-                : section === "junior"
-                  ? "Programas para jóvenes según edad y nivel."
-                  : "Experiencias con fecha, plazas y pago online."}
-            </p>
+        {section !== "private" ? (
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div>
+              <h3 className="font-semibold">
+                {section === "packages"
+                  ? "Bonos y programas"
+                  : section === "junior"
+                    ? "Junior Academy"
+                    : "Próximas actividades"}
+              </h3>
+              <p className="mt-1 text-sm text-muted">
+                {section === "packages"
+                  ? "Los bonos y programas se podrán configurar desde el backoffice."
+                  : section === "junior"
+                    ? "Programas para jóvenes según edad y nivel."
+                    : "Experiencias con fecha, plazas y pago online."}
+              </p>
+            </div>
+            {section !== "packages" ? (
+              <span className="hidden text-xs font-medium text-muted sm:block">
+                Plazas limitadas
+              </span>
+            ) : null}
           </div>
-          {section !== "packages" ? (
-            <span className="hidden text-xs font-medium text-muted sm:block">
-              Plazas limitadas
-            </span>
-          ) : null}
-        </div>
-        {section === "packages" ? (
+        ) : null}
+        {section !== "private" && section === "packages" ? (
           <div className="rounded-2xl border border-dashed border-line bg-sand/30 p-6 text-sm text-muted">
             Aún no hay bonos configurados para reservar online en esta demo.
           </div>
-        ) : (
+        ) : section !== "private" ? (
           <div className="mb-2 grid gap-3 sm:grid-cols-2">
             {visibleActivities.map((activity) => {
               const teacher = data.teachers.find(
@@ -265,12 +362,9 @@ export function ServiceStep({ data, draft, onChange }: Props) {
               );
               const places = availablePlaces(activity, data.bookings);
               return (
-                <CatalogCard
+                <ActivityCard
                   key={activity.id}
-                  title={activity.name}
-                  detail={`${formatDate(activity.startsAt, { day: "numeric", month: "short" })} · ${formatTime(activity.startsAt)} · ${places} plazas · ${formatMoney(activity.price)} · ${teacher?.name ?? "Equipo GNG"}`}
                   action={places ? "Ver actividad" : "Completa"}
-                  variant="activity"
                   disabled={!places}
                   selected={
                     draft.activityId === activity.id &&
@@ -287,6 +381,9 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                       endsAt: activity.endsAt,
                     })
                   }
+                  activity={activity}
+                  teacherName={teacher?.name ?? "Equipo GNG"}
+                  places={places}
                 />
               );
             })}
@@ -296,8 +393,8 @@ export function ServiceStep({ data, draft, onChange }: Props) {
               </div>
             ) : null}
           </div>
-        )}
-        {draft.discoveryMode === "teacher_first" ? (
+        ) : null}
+        {section === "private" && draft.discoveryMode === "teacher_first" ? (
           <div className="mb-2">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-semibold">Elige tu profesor</h3>
@@ -305,12 +402,8 @@ export function ServiceStep({ data, draft, onChange }: Props) {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {activeTeachers.map((teacher) => (
-                <CatalogCard
+                <TeacherCard
                   key={teacher.id}
-                  title={teacher.name}
-                  detail={`${categoryLabels[teacher.category]} · ${formatMoney(teacher.customerPrice)} por sesión`}
-                  action="Elegir"
-                  image={teacher.photoUrl}
                   selected={
                     draft.teacherId === teacher.id &&
                     draft.mode === "private_lesson"
@@ -325,6 +418,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                       endsAt: "",
                     })
                   }
+                  teacher={teacher}
                 />
               ))}
             </div>
@@ -490,60 +584,108 @@ export function ServiceStep({ data, draft, onChange }: Props) {
   );
 }
 
-function CatalogCard({
-  title,
-  detail,
-  action,
-  image,
-  selected = false,
-  disabled = false,
-  muted = false,
-  variant = "default",
+function TeacherCard({
+  teacher,
+  selected,
   onClick,
 }: {
-  title: string;
-  detail: string;
-  action: string;
-  image?: string;
-  selected?: boolean;
-  disabled?: boolean;
-  muted?: boolean;
-  variant?: "default" | "activity";
-  onClick?: () => void;
+  teacher: DemoData["teachers"][number];
+  selected: boolean;
+  onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      disabled={disabled || muted}
+      aria-pressed={selected}
       onClick={onClick}
-      aria-pressed={muted ? undefined : selected}
       className={cn(
-        "group relative min-h-24 overflow-hidden rounded-2xl border bg-white p-4 text-left transition",
-        variant === "activity" &&
-          "rounded-xl border-0 border-l-4 border-coral/70 bg-sand/35 hover:bg-sand/60 hover:shadow-none",
-        selected
-          ? "border-forest ring-3 ring-forest/10"
-          : "border-line hover:-translate-y-0.5 hover:shadow-lg",
-        muted && "cursor-default bg-sand/45",
-        disabled && "cursor-not-allowed opacity-55",
+        "group flex items-center gap-4 border-b py-3 text-left transition hover:border-forest",
+        selected ? "border-forest" : "border-line",
       )}
     >
-      {image ? (
-        <Image
-          src={image}
-          alt=""
-          fill
-          sizes="56px"
-          className="absolute right-0 bottom-0 size-20 object-cover opacity-25 transition group-hover:opacity-35"
-        />
-      ) : null}
-      <span className="relative block pr-16">
-        <strong className="block text-sm">{title}</strong>
-        <span className="mt-1 block text-xs leading-5 text-muted">
-          {detail}
+      <span className="relative size-14 shrink-0 overflow-hidden rounded-full bg-sand">
+        {teacher.photoUrl ? (
+          <Image
+            src={teacher.photoUrl}
+            alt={`Foto de ${teacher.name}`}
+            fill
+            sizes="56px"
+            className="object-cover grayscale-[15%] transition group-hover:scale-105"
+          />
+        ) : null}
+      </span>
+      <span className="min-w-0 flex-1">
+        <strong className="block truncate text-sm">{teacher.name}</strong>
+        <span className="mt-1 block truncate text-xs text-muted">
+          {categoryLabels[teacher.category]}
         </span>
       </span>
-      <span className="relative mt-3 inline-flex items-center gap-1 text-xs font-bold text-forest">
+      <span className="text-right">
+        <strong className="block text-sm">
+          {formatMoney(teacher.customerPrice)}
+        </strong>
+        <span className="text-[11px] text-muted">por sesión</span>
+      </span>
+      <ArrowRight className="shrink-0 text-coral" size={17} />
+    </button>
+  );
+}
+
+function ActivityCard({
+  activity,
+  teacherName,
+  places,
+  action,
+  selected,
+  disabled,
+  onClick,
+}: {
+  activity: DemoData["activities"][number];
+  teacherName: string;
+  places: number;
+  action: string;
+  selected: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const date = new Date(activity.startsAt);
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-pressed={selected}
+      onClick={onClick}
+      className={cn(
+        "group grid min-h-28 grid-cols-[58px_1fr_auto] items-center gap-4 border-b py-4 text-left transition",
+        selected ? "border-forest" : "border-line hover:border-forest/50",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
+      <span className="border-r border-line pr-4 text-center">
+        <span className="block text-[11px] font-bold uppercase tracking-[.12em] text-coral">
+          {date
+            .toLocaleDateString("es-ES", { weekday: "short" })
+            .replace(".", "")}
+        </span>
+        <strong className="mt-1 block text-2xl font-medium leading-none">
+          {date.getDate()}
+        </strong>
+        <span className="mt-1 block text-[11px] text-muted">
+          {date
+            .toLocaleDateString("es-ES", { month: "short" })
+            .replace(".", "")}
+        </span>
+      </span>
+      <span className="min-w-0">
+        <strong className="block truncate text-sm">{activity.name}</strong>
+        <span className="mt-1 block truncate text-xs text-muted">
+          {formatTime(activity.startsAt)} · {places} plazas · {teacherName}
+        </span>
+        <span className="mt-2 block text-xs font-medium text-muted">
+          {formatMoney(activity.price)} por persona
+        </span>
+      </span>
+      <span className="hidden items-center gap-1 text-xs font-bold text-forest sm:inline-flex">
         {action} <ArrowRight size={14} />
       </span>
     </button>

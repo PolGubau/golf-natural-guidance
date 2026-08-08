@@ -4,6 +4,7 @@ import {
   MapPinIcon as MapPin,
   UsersThreeIcon as UsersRound,
 } from "@phosphor-icons/react";
+import Image from "next/image";
 import { resolveCustomerPrice } from "~/domain/booking";
 import type { DemoData } from "~/domain/models";
 import { formatDate, formatMoney, formatTime } from "~/lib/format";
@@ -21,9 +22,21 @@ export function BookingSummary({
   const price = teacher
     ? resolveCustomerPrice(activity, teacher, draft.memberType)
     : 0;
+  const atmosphereTeacher =
+    teacher ?? data.teachers.find((item) => item.active) ?? data.teachers[0];
   return (
     <aside className="surface overflow-hidden rounded-[26px]">
       <div className="relative min-h-44 overflow-hidden bg-forest p-6 text-white">
+        {atmosphereTeacher?.photoUrl ? (
+          <Image
+            src={atmosphereTeacher.photoUrl}
+            alt=""
+            fill
+            sizes="340px"
+            className="scale-110 object-cover opacity-30 blur-[2px]"
+          />
+        ) : null}
+        <div className="absolute inset-0 bg-forest/75" />
         <div className="absolute -top-16 -right-14 size-44 rounded-full border-[28px] border-white/5" />
         <div className="absolute -right-4 -bottom-16 size-36 rounded-full bg-coral/80 blur-sm" />
         <span className="relative text-xs font-bold uppercase tracking-[.16em] text-white/55">

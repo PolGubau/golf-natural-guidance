@@ -196,7 +196,7 @@ export function BookingExperience() {
   };
 
   return (
-    <div className="min-h-dvh bg-[radial-gradient(circle_at_90%_15%,rgba(233,111,76,.11),transparent_25%),radial-gradient(circle_at_10%_80%,rgba(24,62,50,.08),transparent_25%)]">
+    <div className="min-h-dvh bg-canvas">
       <BookingHeader />
       <main className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6 lg:py-7">
         <div className="mb-5 flex items-center justify-between gap-4">
@@ -213,7 +213,7 @@ export function BookingExperience() {
           <section
             ref={flowRef}
             tabIndex={-1}
-            className="surface scroll-mt-4 overflow-hidden rounded-[28px] outline-none"
+            className="scroll-mt-4 overflow-hidden border-x border-line/70 bg-white/45 outline-none"
           >
             <Progress current={step} />
             <div className="min-h-[480px] p-5 sm:p-8">
@@ -323,7 +323,7 @@ function BookingHeader() {
         <Brand />
         <Link
           href="/admin"
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-line bg-white px-3.5 text-sm font-semibold shadow-xs transition hover:bg-sand"
+          className="inline-flex min-h-10 items-center gap-2 border-b border-transparent px-1 text-sm font-semibold transition hover:border-coral"
         >
           <LayoutDashboard size={16} />{" "}
           <span className="hidden sm:inline">Abrir backoffice</span>
@@ -337,17 +337,17 @@ function Progress({ current }: { current: number }) {
   return (
     <nav
       aria-label="Progreso de la reserva"
-      className="scrollbar-none overflow-x-auto border-b border-line bg-white/55 px-5 sm:px-8"
+      className="scrollbar-none overflow-x-auto border-b border-line px-5 sm:px-8"
     >
       <ol className="flex min-w-max items-center gap-2">
         {steps.map((label, index) => (
           <li
             key={label}
             aria-current={index === current ? "step" : undefined}
-            className={`relative flex h-16 items-center gap-2 px-2 text-xs font-semibold ${index <= current ? "text-ink" : "text-muted/55"}`}
+            className={`relative flex h-14 items-center gap-2 px-2 text-xs font-semibold ${index <= current ? "text-ink" : "text-muted/55"}`}
           >
             <span
-              className={`grid size-6 place-items-center rounded-full text-[10px] ${index < current ? "bg-forest text-white" : index === current ? "bg-coral text-white" : "bg-sand"}`}
+              className={`grid size-6 place-items-center rounded-full text-[10px] ${index < current ? "bg-forest text-white" : index === current ? "bg-coral text-white" : "border border-line bg-transparent"}`}
             >
               {index + 1}
             </span>

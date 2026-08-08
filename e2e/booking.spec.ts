@@ -16,8 +16,10 @@ test("mobile selection reveals its configuration and the next step", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/booking");
-  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
-  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page
+    .getByRole("button", { name: /Tengo un profesor en mente/ })
+    .click();
+  await page.getByRole("button", { name: /Toni Planells/ }).click();
 
   await expect(
     page.getByRole("heading", { name: "Clase con Toni Planells" }),
@@ -33,7 +35,9 @@ test("a new client can search by time before choosing a teacher", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/booking");
-  await page.getByRole("button", { name: /No tengo preferencia/ }).click();
+  await page
+    .getByRole("button", { name: /Buscar una hora disponible/ })
+    .click();
   await page.getByRole("button", { name: "Continuar" }).click();
 
   await expect(
@@ -71,8 +75,10 @@ test("offers another teacher when the selected one has no availability", async (
     localStorage.setItem(key, JSON.stringify(store));
   });
   await page.reload();
-  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
-  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page
+    .getByRole("button", { name: /Tengo un profesor en mente/ })
+    .click();
+  await page.getByRole("button", { name: /Toni Planells/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: /^lunes/ }).click();
 
@@ -92,8 +98,10 @@ test("a returning client skips access and receives saved details", async ({
   page,
 }) => {
   await page.goto("/booking");
-  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
-  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page
+    .getByRole("button", { name: /Tengo un profesor en mente/ })
+    .click();
+  await page.getByRole("button", { name: /Toni Planells/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page
     .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
@@ -117,8 +125,10 @@ test("a returning client skips access and receives saved details", async ({
   await page.getByRole("button", { name: "Continuar con Google" }).click();
 
   await page.reload();
-  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
-  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page
+    .getByRole("button", { name: /Tengo un profesor en mente/ })
+    .click();
+  await page.getByRole("button", { name: /Toni Planells/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page
     .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
@@ -137,8 +147,10 @@ test("a returning client skips access and receives saved details", async ({
 
 test("private lesson appears in the backoffice", async ({ page }) => {
   await page.goto("/booking");
-  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
-  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page
+    .getByRole("button", { name: /Tengo un profesor en mente/ })
+    .click();
+  await page.getByRole("button", { name: /Toni Planells/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
 
   const weekday = page
@@ -175,7 +187,7 @@ test("group activity only offers online payment and consumes a place", async ({
   page,
 }) => {
   await page.goto("/booking");
-  await page.getByRole("button", { name: /Curso o actividad/ }).click();
+  await page.getByRole("button", { name: /Quiero una actividad/ }).click();
   await page.getByRole("button", { name: /Swing Lab/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: "Continuar con Google" }).click();
