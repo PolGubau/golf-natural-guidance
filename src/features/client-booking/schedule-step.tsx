@@ -1,4 +1,9 @@
-import { CalendarDays, Check, Clock3, MapPin } from "lucide-react";
+import {
+  CalendarDotsIcon as CalendarDays,
+  CheckIcon as Check,
+  ClockIcon as Clock3,
+  MapPinIcon as MapPin,
+} from "@phosphor-icons/react";
 import { getAvailableSlots } from "~/domain/booking";
 import type { DemoData } from "~/domain/models";
 import { cn } from "~/lib/cn";

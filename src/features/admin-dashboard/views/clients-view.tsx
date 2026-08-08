@@ -1,4 +1,8 @@
-import { Mail, Phone, UserRoundSearch } from "lucide-react";
+import {
+  EnvelopeSimpleIcon as Mail,
+  PhoneIcon as Phone,
+  UserListIcon as UserRoundSearch,
+} from "@phosphor-icons/react";
 import { EmptyState } from "~/components/ui/states";
 import type { DemoData } from "~/domain/models";
 import { formatMoney, initials } from "~/lib/format";

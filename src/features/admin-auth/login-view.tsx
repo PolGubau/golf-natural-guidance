@@ -1,6 +1,10 @@
 "use client";
 
-import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
+import {
+  ArrowRightIcon as ArrowRight,
+  LockKeyIcon as LockKeyhole,
+  ShieldCheckIcon as ShieldCheck,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useActionState } from "react";

@@ -1,4 +1,8 @@
-import { AlertCircle, Database, LoaderCircle } from "lucide-react";
+import {
+  WarningCircleIcon as AlertCircle,
+  DatabaseIcon as Database,
+  CircleNotchIcon as LoaderCircle,
+} from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 export function LoadingState({

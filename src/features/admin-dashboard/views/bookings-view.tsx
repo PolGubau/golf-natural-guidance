@@ -1,6 +1,9 @@
 "use client";
 
-import { CalendarX2, Search } from "lucide-react";
+import {
+  CalendarXIcon as CalendarX2,
+  MagnifyingGlassIcon as Search,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { updateBookingStatus } from "~/application/manage-demo";
 import { Badge } from "~/components/ui/badge";

@@ -1,7 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarClock, Check, Edit3, Plus, Power } from "lucide-react";
+import {
+  CalendarDotsIcon as CalendarClock,
+  CheckIcon as Check,
+  PencilSimpleIcon as Edit3,
+  PlusIcon as Plus,
+  PowerIcon as Power,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

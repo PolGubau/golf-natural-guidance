@@ -1,18 +1,18 @@
 "use client";
 
 import {
-  Bell,
-  CalendarDays,
-  CalendarRange,
-  CircleDollarSign,
-  GraduationCap,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Settings2,
-  UsersRound,
-  X,
-} from "lucide-react";
+  BellIcon as Bell,
+  CalendarDotsIcon as CalendarDays,
+  CalendarBlankIcon as CalendarRange,
+  CurrencyCircleDollarIcon as CircleDollarSign,
+  GraduationCapIcon as GraduationCap,
+  SquaresFourIcon as LayoutDashboard,
+  SignOutIcon as LogOut,
+  ListIcon as Menu,
+  SlidersHorizontalIcon as Settings2,
+  UsersThreeIcon as UsersRound,
+  XIcon as X,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import { Brand } from "~/components/brand";
@@ -106,7 +106,7 @@ export function AdminShell({
                 >
                   <Icon
                     size={18}
-                    strokeWidth={section === item.id ? 2.3 : 1.8}
+                    weight={section === item.id ? "bold" : "regular"}
                   />
                   {item.label}
                   {item.id === "billing" &&

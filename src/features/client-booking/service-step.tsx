@@ -1,4 +1,9 @@
-import { ArrowRight, CalendarDays, Check, Clock3 } from "lucide-react";
+import {
+  ArrowRightIcon as ArrowRight,
+  CalendarDotsIcon as CalendarDays,
+  CheckIcon as Check,
+  ClockIcon as Clock3,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";

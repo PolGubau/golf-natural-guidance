@@ -1,7 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Clock3, Edit3, Plus, UsersRound } from "lucide-react";
+import {
+  CheckIcon as Check,
+  ClockIcon as Clock3,
+  PencilSimpleIcon as Edit3,
+  PlusIcon as Plus,
+  UsersThreeIcon as UsersRound,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { saveActivity } from "~/application/manage-demo";

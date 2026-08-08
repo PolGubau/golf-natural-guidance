@@ -112,7 +112,7 @@ La demo puede ejecutarse en local con la misma estructura, aunque sustituya la c
 - TypeScript con `strict: true`.
 - Tailwind CSS v4.
 - Componentes propios y componentes accesibles headless.
-- `lucide-react` para iconos.
+- `@phosphor-icons/react` para iconos, con pesos y tamaños explícitos según jerarquía visual.
 - Zod para validación de formularios y contratos.
 - React Hook Form para formularios no triviales.
 - Vitest para lógica de dominio.

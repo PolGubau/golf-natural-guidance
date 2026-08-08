@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Database,
-  Mail,
-  MapPin,
-  Phone,
-  RefreshCcw,
-  ShieldCheck,
-} from "lucide-react";
+  DatabaseIcon as Database,
+  EnvelopeSimpleIcon as Mail,
+  MapPinIcon as MapPin,
+  PhoneIcon as Phone,
+  ArrowCounterClockwiseIcon as RefreshCcw,
+  ShieldCheckIcon as ShieldCheck,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Dialog } from "~/components/ui/dialog";

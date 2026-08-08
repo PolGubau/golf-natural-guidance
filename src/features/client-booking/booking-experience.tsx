@@ -1,11 +1,10 @@
 "use client";
 
 import {
-  ArrowLeft,
-  ArrowRight,
-  LayoutDashboard,
-  LockKeyhole,
-} from "lucide-react";
+  ArrowLeftIcon as ArrowLeft,
+  ArrowRightIcon as ArrowRight,
+  SquaresFourIcon as LayoutDashboard,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { createBooking } from "~/application/create-booking";
@@ -138,9 +137,6 @@ export function BookingExperience() {
             <h1 className="mt-2 text-3xl font-semibold tracking-[-.035em] sm:text-4xl">
               Juega mejor, de forma natural.
             </h1>
-          </div>
-          <div className="hidden items-center gap-2 text-xs text-muted sm:flex">
-            <LockKeyhole size={14} /> Datos locales y pago simulado
           </div>
         </div>
         {recovered ? (

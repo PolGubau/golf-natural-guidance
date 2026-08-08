@@ -1,4 +1,7 @@
-import { CalendarDays, Clock3 } from "lucide-react";
+import {
+  CalendarDotsIcon as CalendarDays,
+  ClockIcon as Clock3,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import { useState } from "react";
 import type { DemoData } from "~/domain/models";

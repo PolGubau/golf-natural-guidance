@@ -1,4 +1,8 @@
-import { ArrowRight, CalendarCheck2, Check } from "lucide-react";
+import {
+  ArrowRightIcon as ArrowRight,
+  CalendarCheckIcon as CalendarCheck2,
+  CheckIcon as Check,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import type { DemoData } from "~/domain/models";
@@ -21,7 +25,7 @@ export function Confirmation({
       <div className="surface w-full overflow-hidden rounded-[30px] text-center">
         <div className="bg-forest px-6 py-12 text-white">
           <span className="mx-auto grid size-16 place-items-center rounded-full bg-white text-forest shadow-xl">
-            <Check size={30} strokeWidth={2.5} />
+            <Check size={30} weight="bold" />
           </span>
           <p className="mt-6 text-xs font-bold uppercase tracking-[.2em] text-coral">
             Reserva confirmada

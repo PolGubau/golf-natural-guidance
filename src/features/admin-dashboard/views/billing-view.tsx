@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Check,
-  CircleDollarSign,
-  Download,
-  FileCheck2,
-  FileText,
-  ReceiptText,
-} from "lucide-react";
+  CheckIcon as Check,
+  CurrencyCircleDollarIcon as CircleDollarSign,
+  DownloadSimpleIcon as Download,
+  SealCheckIcon as FileCheck2,
+  FileTextIcon as FileText,
+  ReceiptIcon as ReceiptText,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";

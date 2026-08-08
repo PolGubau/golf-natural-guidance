@@ -1,4 +1,9 @@
-import { CalendarDays, Clock3, MapPin, UsersRound } from "lucide-react";
+import {
+  CalendarDotsIcon as CalendarDays,
+  ClockIcon as Clock3,
+  MapPinIcon as MapPin,
+  UsersThreeIcon as UsersRound,
+} from "@phosphor-icons/react";
 import { resolveCustomerPrice } from "~/domain/booking";
 import type { DemoData } from "~/domain/models";
 import { formatDate, formatMoney, formatTime } from "~/lib/format";
@@ -38,7 +43,7 @@ export function BookingSummary({
       </div>
       <div className="space-y-4 p-6">
         <SummaryRow
-          icon={<CalendarDays />}
+          icon={<CalendarDays weight="duotone" />}
           label="Fecha"
           value={
             draft.startsAt
@@ -51,7 +56,7 @@ export function BookingSummary({
           }
         />
         <SummaryRow
-          icon={<Clock3 />}
+          icon={<Clock3 weight="duotone" />}
           label="Hora"
           value={
             draft.startsAt
@@ -60,11 +65,15 @@ export function BookingSummary({
           }
         />
         <SummaryRow
-          icon={<UsersRound />}
+          icon={<UsersRound weight="duotone" />}
           label="Jugadores"
           value={String(draft.playerCount)}
         />
-        <SummaryRow icon={<MapPin />} label="Lugar" value="Golf Son Muntaner" />
+        <SummaryRow
+          icon={<MapPin weight="duotone" />}
+          label="Lugar"
+          value="Golf Son Muntaner"
+        />
         <div className="border-t border-line pt-4">
           <div className="flex items-end justify-between">
             <span className="text-sm text-muted">Total</span>
@@ -92,7 +101,7 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="grid size-9 place-items-center rounded-xl bg-sand text-muted [&>svg]:size-16">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sand text-muted [&>svg]:size-[18px]">
         {icon}
       </span>
       <span className="min-w-0">

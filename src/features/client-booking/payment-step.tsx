@@ -1,10 +1,10 @@
 import {
-  Check,
-  CreditCard,
-  LoaderCircle,
-  ShieldCheck,
-  WalletCards,
-} from "lucide-react";
+  CheckIcon as Check,
+  CreditCardIcon as CreditCard,
+  CircleNotchIcon as LoaderCircle,
+  ShieldCheckIcon as ShieldCheck,
+  WalletIcon as WalletCards,
+} from "@phosphor-icons/react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/cn";
 import type { BookingDraft } from "./types";

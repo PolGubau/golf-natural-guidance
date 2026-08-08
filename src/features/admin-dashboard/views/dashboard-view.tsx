@@ -1,11 +1,11 @@
 import {
-  ArrowUpRight,
-  CalendarCheck2,
-  CircleDollarSign,
-  Clock3,
-  GraduationCap,
-  UsersRound,
-} from "lucide-react";
+  ArrowUpRightIcon as ArrowUpRight,
+  CalendarCheckIcon as CalendarCheck2,
+  CurrencyCircleDollarIcon as CircleDollarSign,
+  ClockIcon as Clock3,
+  GraduationCapIcon as GraduationCap,
+  UsersThreeIcon as UsersRound,
+} from "@phosphor-icons/react";
 import type { DemoData } from "~/domain/models";
 import { localDateKey } from "~/lib/dates";
 import { formatDate, formatMoney, formatTime, initials } from "~/lib/format";
