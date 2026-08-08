@@ -12,7 +12,7 @@ export function ClientsView({ data }: { data: DemoData }) {
     <div>
       <h2 className="text-2xl font-semibold tracking-tight">Clientes</h2>
       <p className="mt-1 text-sm text-muted">
-        Perfiles creados desde las reservas locales.
+        Perfiles creados desde las reservas.
       </p>
       {data.students.length ? (
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -52,7 +52,7 @@ export function ClientsView({ data }: { data: DemoData }) {
                 </div>
                 <div className="mt-5 flex items-end justify-between border-t border-line pt-4">
                   <span className="text-[10px] uppercase tracking-wider text-muted">
-                    Cobrado mock
+                    Cobrado
                   </span>
                   <strong>{formatMoney(spent)}</strong>
                 </div>

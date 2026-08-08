@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BookingError, createBooking } from "~/application/create-booking";
-import { availablePlaces, getAvailableSlots, overlaps } from "~/domain/booking";
+import {
+  availablePlaces,
+  getAvailableSlots,
+  getAvailableTeacherSlots,
+  overlaps,
+} from "~/domain/booking";
 import { createSeed } from "~/infrastructure/seed";
 import { addDays, localDateKey } from "~/lib/dates";
 
@@ -50,6 +55,16 @@ describe("booking domain", () => {
     ).toBe(true);
   });
 
+  it("groups available teachers by time for schedule-first booking", () => {
+    const data = createSeed();
+    const slots = getAvailableTeacherSlots(data, nextWeekday(1));
+
+    expect(slots.length).toBeGreaterThan(0);
+    expect(slots[0].startsAt.slice(11, 16)).toBe("08:00");
+    expect(slots[0].teachers.length).toBeGreaterThan(1);
+    expect(slots[0].teachers.every((teacher) => teacher.active)).toBe(true);
+  });
+
   it("creates a confirmed booking with payment and compensation snapshots", () => {
     const data = createSeed();
     const date = nextWeekday(1);
@@ -72,6 +87,36 @@ describe("booking domain", () => {
     expect(booking.customerPrice).toBe(150);
     expect(booking.paymentStatus).toBe("pending");
     expect(result.compensationLines.at(-1)?.bookingId).toBe(booking.id);
+  });
+
+  it("links an authenticated account and refreshes its saved profile", () => {
+    const data = createSeed();
+    const slot = getAvailableSlots(data, "teacher-toni", nextWeekday(1))[0];
+    const result = createBooking(data, {
+      type: "private_lesson",
+      authUserId: "google-lucia",
+      teacherId: "teacher-toni",
+      productId: "product-private",
+      startsAt: slot.startsAt,
+      endsAt: slot.endsAt,
+      playerCount: 1,
+      memberType: "unknown",
+      paymentMethod: "online",
+      customer: {
+        name: "Lucía Actualizada",
+        email: "lucia@example.com",
+        phone: "+34 611 111 111",
+      },
+    });
+
+    expect(result.bookings.at(-1)?.studentId).toBe("student-lucia");
+    expect(
+      result.students.find((student) => student.id === "student-lucia"),
+    ).toMatchObject({
+      authUserId: "google-lucia",
+      name: "Lucía Actualizada",
+      phone: "+34 611 111 111",
+    });
   });
 
   it("requires online payment and respects group capacity", () => {

@@ -120,9 +120,9 @@ export function AdminShell({
             })}
           </nav>
           <div className="mt-auto rounded-2xl bg-forest p-4 text-white">
-            <p className="text-xs text-white/55">Demo local</p>
+            <p className="text-xs text-white/55">Portal de reservas</p>
             <p className="mt-1 text-sm font-semibold">
-              Datos guardados en este navegador
+              Revisa la experiencia de tus clientes
             </p>
             <Link
               href="/booking"
@@ -200,7 +200,7 @@ export function AdminShell({
           <main className="max-h-[calc(100dvh-78px)] overflow-y-auto p-4 sm:p-7">
             {recovered ? (
               <div className="mb-5 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-                Algunos datos locales se restauraron de forma segura.
+                Algunos datos se restauraron desde una copia segura.
               </div>
             ) : null}
             {section === "dashboard" ? (

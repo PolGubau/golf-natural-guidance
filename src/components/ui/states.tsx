@@ -46,9 +46,9 @@ export function ErrorState() {
     <div className="grid min-h-[60vh] place-items-center">
       <div className="max-w-sm rounded-2xl border border-red-100 bg-red-50 p-6 text-center text-red-800">
         <AlertCircle className="mx-auto mb-3" />
-        <strong>No hemos podido cargar los datos locales</strong>
+        <strong>No hemos podido cargar los datos</strong>
         <p className="mt-1 text-sm">
-          Recarga la página o reinicia la demo desde este navegador.
+          Recarga la página o contacta con el equipo de soporte.
         </p>
       </div>
     </div>

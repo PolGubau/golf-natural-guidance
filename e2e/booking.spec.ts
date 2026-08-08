@@ -16,10 +16,11 @@ test("mobile selection reveals its configuration and the next step", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/booking");
+  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
   await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Completa tu clase" }),
+    page.getByRole("heading", { name: "Clase con Toni Planells" }),
   ).toBeInViewport();
   await page.getByRole("button", { name: "Continuar" }).click();
   await expect(
@@ -27,8 +28,116 @@ test("mobile selection reveals its configuration and the next step", async ({
   ).toBeInViewport();
 });
 
+test("a new client can search by time before choosing a teacher", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/booking");
+  await page.getByRole("button", { name: /No tengo preferencia/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "¿Cuándo puedes venir?" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /sin disponibilidad/ }).first(),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: /^08:00/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Elige tu profesor" }),
+  ).toBeInViewport();
+  await page.getByRole("button", { name: /Nico Loprete/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await expect(
+    page.getByRole("heading", {
+      name: "Guarda tus datos para la próxima vez",
+    }),
+  ).toBeVisible();
+});
+
+test("offers another teacher when the selected one has no availability", async ({
+  page,
+}) => {
+  await page.goto("/booking");
+  await page.waitForFunction(() => localStorage.getItem("gng-demo:teachers"));
+  await page.evaluate(() => {
+    const key = "gng-demo:teachers";
+    const store = JSON.parse(localStorage.getItem(key) ?? "null");
+    const toni = store?.data?.find(
+      (teacher: { id: string }) => teacher.id === "teacher-toni",
+    );
+    if (toni) toni.availability = [];
+    localStorage.setItem(key, JSON.stringify(store));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
+  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await page.getByRole("button", { name: /^lunes/ }).click();
+
+  await expect(
+    page.getByText("Toni Planells no tiene disponibilidad este día."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Otros profesores disponibles este día",
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /Nico Loprete.*Cambiar/ }).click();
+  await expect(page.getByRole("button", { name: /^08:00$/ })).toBeVisible();
+});
+
+test("a returning client skips access and receives saved details", async ({
+  page,
+}) => {
+  await page.goto("/booking");
+  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
+  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await page
+    .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: /^08:00$/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await page.getByRole("button", { name: "Continuar con Google" }).click();
+  await expect(page.getByLabel("Nombre y apellidos")).toHaveValue(
+    "Lucía Martín",
+  );
+  await expect(
+    page.getByText("Has iniciado sesión como lucia@example.com"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Cambiar cuenta" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Guarda tus datos para la próxima vez",
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Continuar con Google" }).click();
+
+  await page.reload();
+  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
+  await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await page
+    .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: /^08:00$/ }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "¿A nombre de quién reservamos?" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Continuar con Google" }),
+  ).toHaveCount(0);
+});
+
 test("private lesson appears in the backoffice", async ({ page }) => {
   await page.goto("/booking");
+  await page.getByRole("button", { name: /Quiero elegir profesor/ }).click();
   await page.getByRole("button", { name: /Clase con Toni Planells/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
 
@@ -38,8 +147,14 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   await weekday.click();
   await page.getByRole("button", { name: /^08:00$/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Guarda tus datos para la próxima vez",
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Continuar con Google" }).click();
   await page.getByLabel("Nombre y apellidos").fill("Cliente E2E");
-  await page.getByLabel("Email").fill("cliente-e2e@example.com");
+  await expect(page.getByLabel("Email")).toHaveValue("lucia@example.com");
   await page.getByRole("button", { name: /Continuar al pago/ }).click();
   await page.getByRole("button", { name: /Pagar en persona/ }).click();
   await page
@@ -52,7 +167,7 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
   await loginAsToni(page);
   await page.getByRole("button", { name: "Reservas" }).click();
-  await expect(page.getByText("Cliente E2E")).toBeVisible();
+  await expect(page.getByText("Cliente E2E").first()).toBeVisible();
   await expect(page.getByText(/En persona · Pendiente/)).toBeVisible();
 });
 
@@ -60,17 +175,17 @@ test("group activity only offers online payment and consumes a place", async ({
   page,
 }) => {
   await page.goto("/booking");
+  await page.getByRole("button", { name: /Curso o actividad/ }).click();
   await page.getByRole("button", { name: /Swing Lab/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
-  await page.getByRole("button", { name: "Continuar" }).click();
+  await page.getByRole("button", { name: "Continuar con Google" }).click();
   await page.getByLabel("Nombre y apellidos").fill("Grupo E2E");
-  await page.getByLabel("Email").fill("grupo-e2e@example.com");
   await page.getByRole("button", { name: /Continuar al pago/ }).click();
 
   await expect(
     page.getByRole("button", { name: /Pagar en persona/ }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: /Completar pago mock/ }).click();
+  await page.getByRole("button", { name: /^Confirmar y pagar$/ }).click();
   await expect(
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
   ).toBeVisible();

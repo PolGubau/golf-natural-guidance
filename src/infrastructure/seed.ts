@@ -163,6 +163,7 @@ export function createSeed(): DemoData {
     students: [
       {
         id: "student-lucia",
+        authUserId: "google-lucia",
         name: "Lucía Martín",
         email: "lucia@example.com",
         phone: "+34 600 123 456",

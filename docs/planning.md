@@ -44,6 +44,15 @@ Datos confirmados en el briefing:
 - Una reserva web debe pagarse online según la operativa indicada.
 - También se ha indicado que las clases particulares pueden pagarse en persona.
 - Las actividades de grupo no deben permitir pago presencial.
+- El cliente debe disponer de una cuenta compatible con acceso mediante Google.
+- El acceso se solicitará después de elegir experiencia y horario, antes de pedir
+  los datos personales y realizar el pago.
+- Los datos del perfil se reutilizarán en futuras reservas.
+- Las reservas deben vincularse a una identidad estable para obtener estadísticas
+  por cliente.
+- La reserva debe poder comenzar por disponibilidad o por profesor/actividad.
+- Si el cliente busca por horario, solo se mostrarán profesores disponibles para
+  la fecha y hora seleccionadas.
 - Se desea generar una factura para cada profesor cuando se le asigna una clase.
 - A final de mes se necesita una factura por profesor con todas sus horas.
 - Actualmente utilizan Golfmanager, pero su operativa es distinta.

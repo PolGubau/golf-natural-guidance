@@ -68,6 +68,7 @@ export type Activity = {
 
 export type Student = {
   id: string;
+  authUserId?: string;
   name: string;
   email: string;
   phone?: string;

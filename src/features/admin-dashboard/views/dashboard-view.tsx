@@ -45,7 +45,7 @@ export function DashboardView({
           />
           <Metric
             icon={<CircleDollarSign />}
-            label="Cobrado (mock)"
+            label="Cobrado"
             value={formatMoney(collected)}
             note="Pagos online"
           />
@@ -61,7 +61,7 @@ export function DashboardView({
             icon={<UsersRound />}
             label="Clientes"
             value={String(data.students.length)}
-            note="Perfiles locales"
+            note="Perfiles registrados"
           />
         </div>
       </section>

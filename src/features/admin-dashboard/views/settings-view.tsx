@@ -24,7 +24,7 @@ export function SettingsView({ data }: { data: DemoData }) {
         Configuración básica
       </h2>
       <p className="mt-1 text-sm text-muted">
-        Reglas visibles y estado de esta demo local.
+        Reglas operativas y configuración general.
       </p>
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <section className="surface rounded-[22px] p-5">
@@ -58,7 +58,7 @@ export function SettingsView({ data }: { data: DemoData }) {
           <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-800">
             <ShieldCheck />
             <div>
-              <strong className="block text-sm">Configuración de demo</strong>
+              <strong className="block text-sm">Criterio provisional</strong>
               <span className="text-xs">
                 No constituye asesoramiento fiscal.
               </span>
@@ -93,15 +93,15 @@ export function SettingsView({ data }: { data: DemoData }) {
                 <Database size={18} />
               </span>
               <div>
-                <h3 className="font-semibold">Almacenamiento local</h3>
+                <h3 className="font-semibold">Gestión de datos</h3>
                 <p className="mt-1 text-xs text-muted">
                   {data.bookings.length} reservas y {data.students.length}{" "}
-                  clientes guardados en este navegador.
+                  clientes registrados.
                 </p>
               </div>
             </div>
             <Button variant="danger" onClick={() => setConfirmReset(true)}>
-              <RefreshCcw size={16} /> Reiniciar demo
+              <RefreshCcw size={16} /> Restaurar datos iniciales
             </Button>
           </div>
         </section>
@@ -110,11 +110,11 @@ export function SettingsView({ data }: { data: DemoData }) {
         open={confirmReset}
         onOpenChange={setConfirmReset}
         title="¿Reiniciar todos los datos?"
-        description="Se eliminarán los cambios locales y se restaurará el seed público de la demo."
+        description="Se eliminarán los cambios y se restaurarán los datos iniciales."
       >
         <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
           Esta acción elimina reservas, clientes, cambios de profesores y
-          facturas creadas en este navegador.
+          facturas creadas después de la configuración inicial.
         </div>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setConfirmReset(false)}>

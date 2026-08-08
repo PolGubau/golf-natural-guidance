@@ -81,9 +81,6 @@ export function BookingSummary({
               {price ? formatMoney(price) : "—"}
             </strong>
           </div>
-          <p className="mt-1 text-right text-[11px] text-muted">
-            Precio de demo · impuestos no configurados
-          </p>
         </div>
       </div>
     </aside>

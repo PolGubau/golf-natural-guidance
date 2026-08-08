@@ -53,10 +53,13 @@ export function createBooking(
   }
 
   const existingStudent = data.students.find(
-    (item) => item.email.toLowerCase() === customer.email.toLowerCase(),
+    (item) =>
+      (input.authUserId && item.authUserId === input.authUserId) ||
+      item.email.toLowerCase() === customer.email.toLowerCase(),
   );
-  const student: Student = existingStudent ?? {
-    id: makeId("student"),
+  const student: Student = {
+    id: existingStudent?.id ?? makeId("student"),
+    authUserId: input.authUserId ?? existingStudent?.authUserId,
     ...customer,
   };
   const customerPrice = resolveCustomerPrice(
@@ -67,9 +70,14 @@ export function createBooking(
   const hours =
     (new Date(input.endsAt).getTime() - new Date(input.startsAt).getTime()) /
     3_600_000;
+  const {
+    authUserId: _authUserId,
+    customer: _customer,
+    ...bookingInput
+  } = input;
   const booking: Booking = {
     id: makeId("booking"),
-    ...input,
+    ...bookingInput,
     studentId: student.id,
     customerPrice,
     compensationRate: teacher.compensationRate,
@@ -88,7 +96,9 @@ export function createBooking(
   };
   return {
     ...data,
-    students: existingStudent ? data.students : [...data.students, student],
+    students: existingStudent
+      ? data.students.map((item) => (item.id === student.id ? student : item))
+      : [...data.students, student],
     bookings: [...data.bookings, booking],
     payments: [...data.payments, payment],
     compensationLines: [

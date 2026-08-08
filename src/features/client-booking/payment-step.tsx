@@ -27,7 +27,7 @@ export function PaymentStep({
     {
       value: "online" as const,
       title: "Pagar online",
-      text: "Pago simulado · confirmación inmediata",
+      text: "Confirmación inmediata",
       icon: <CreditCard />,
     },
     ...(!onlineOnly
@@ -45,13 +45,13 @@ export function PaymentStep({
     <div className="space-y-6">
       <div>
         <p className="text-xs font-bold uppercase tracking-[.16em] text-coral">
-          Checkout mock
+          Pago
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">
           Confirma tu reserva
         </h2>
         <p className="mt-1 text-sm text-muted">
-          No se realizará ningún cargo real.
+          Elige cómo quieres completar tu reserva.
         </p>
       </div>
       <div className="grid gap-3">
@@ -90,7 +90,7 @@ export function PaymentStep({
       {draft.paymentMethod === "online" ? (
         <div className="grid grid-cols-2 gap-3 rounded-2xl border border-line bg-white p-4">
           <div className="col-span-2 flex items-center gap-2 text-xs font-semibold text-emerald-700">
-            <ShieldCheck size={15} /> Entorno de pago simulado
+            <ShieldCheck size={15} /> Pago protegido
           </div>
           <div className="col-span-2 rounded-xl bg-sand px-3 py-3 text-sm tracking-[.16em] text-muted">
             4242 4242 4242 4242
@@ -125,13 +125,9 @@ export function PaymentStep({
         {submitting
           ? "Confirmando…"
           : draft.paymentMethod === "online"
-            ? "Completar pago mock"
+            ? "Confirmar y pagar"
             : "Confirmar y pagar en persona"}
       </Button>
-      <p className="text-center text-[11px] text-muted">
-        Al confirmar se crearán la reserva, el pago mock y la compensación del
-        profesor en este navegador.
-      </p>
     </div>
   );
 }

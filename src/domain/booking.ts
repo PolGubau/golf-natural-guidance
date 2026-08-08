@@ -11,6 +11,7 @@ const occupyingStatuses = new Set(["pending", "confirmed"]);
 
 export type CreateBookingInput = {
   type: "private_lesson" | "group_activity";
+  authUserId?: string;
   teacherId: string;
   productId: string;
   activityId?: string;
@@ -110,6 +111,24 @@ export function getAvailableSlots(
     }
   }
   return slots;
+}
+
+export function getAvailableTeacherSlots(data: DemoData, date: string) {
+  const grouped = new Map<
+    string,
+    { startsAt: string; endsAt: string; teachers: Teacher[] }
+  >();
+  for (const teacher of data.teachers.filter((item) => item.active)) {
+    for (const slot of getAvailableSlots(data, teacher.id, date)) {
+      if (!slot.available) continue;
+      const current = grouped.get(slot.startsAt);
+      if (current) current.teachers.push(teacher);
+      else grouped.set(slot.startsAt, { ...slot, teachers: [teacher] });
+    }
+  }
+  return [...grouped.values()].sort((a, b) =>
+    a.startsAt.localeCompare(b.startsAt),
+  );
 }
 
 function toMinutes(time: string) {

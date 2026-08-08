@@ -1,7 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRightIcon as ArrowRight } from "@phosphor-icons/react";
+import {
+  ArrowRightIcon as ArrowRight,
+  CheckCircleIcon as CheckCircle,
+} from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Field, Input, Select } from "~/components/ui/field";
@@ -22,10 +25,16 @@ export function DetailsStep({
   draft,
   onSubmit,
   onGoal,
+  accountEmail,
+  onChangeAccount,
+  emailLocked = false,
 }: {
   draft: BookingDraft;
   onSubmit: (customer: CustomerForm) => void;
   onGoal: (goal: string) => void;
+  accountEmail: string;
+  onChangeAccount: () => void;
+  emailLocked?: boolean;
 }) {
   const {
     register,
@@ -45,9 +54,23 @@ export function DetailsStep({
           ¿A nombre de quién reservamos?
         </h2>
         <p className="mt-1 text-sm text-muted">
-          Solo utilizaremos estos datos para gestionar esta reserva de
-          demostración.
+          Revisa los datos guardados en tu cuenta antes de continuar.
         </p>
+      </div>
+      <div className="flex items-start gap-3 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800">
+        <CheckCircle className="mt-0.5 shrink-0" size={16} />
+        <span className="min-w-0 flex-1">
+          Has iniciado sesión como <strong>{accountEmail}</strong>. Los cambios
+          que hagas se guardarán para tus próximas reservas.
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-emerald-800 hover:bg-emerald-100"
+          onClick={onChangeAccount}
+        >
+          Cambiar cuenta
+        </Button>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nombre y apellidos" error={errors.name?.message}>
@@ -62,6 +85,8 @@ export function DetailsStep({
             type="email"
             autoComplete="email"
             placeholder="tu@email.com"
+            readOnly={emailLocked}
+            className={emailLocked ? "bg-sand text-muted" : undefined}
             {...register("email")}
           />
         </Field>
@@ -84,10 +109,6 @@ export function DetailsStep({
             ))}
           </Select>
         </Field>
-      </div>
-      <div className="rounded-2xl bg-sand p-4 text-xs leading-5 text-muted">
-        Esta demo funciona exclusivamente en tu navegador. No se envía
-        información a ningún servidor ni proveedor externo.
       </div>
       <div className="flex justify-end">
         <Button type="submit" size="lg">

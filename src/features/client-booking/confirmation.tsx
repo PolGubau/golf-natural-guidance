@@ -34,8 +34,7 @@ export function Confirmation({
             Nos vemos en el campo
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/65">
-            El pago y la confirmación son simulados, pero tu reserva ya aparece
-            en el backoffice local.
+            Tu reserva está confirmada. Ya puedes consultar todos sus detalles.
           </p>
         </div>
         <div className="grid gap-6 p-7 sm:grid-cols-2 sm:text-left">

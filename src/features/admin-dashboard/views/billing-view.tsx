@@ -31,9 +31,7 @@ export function BillingView({ data }: { data: DemoData }) {
     <div>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Facturación mock
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Facturación</h2>
           <p className="mt-1 text-sm text-muted">
             Compensación operativa; no son documentos fiscales.
           </p>
@@ -329,7 +327,7 @@ function exportInvoices(data: DemoData) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "facturas-gng-demo.csv";
+  link.download = "facturas-gng.csv";
   link.click();
   URL.revokeObjectURL(url);
 }
