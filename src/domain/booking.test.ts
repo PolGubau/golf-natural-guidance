@@ -99,6 +99,11 @@ describe("booking domain", () => {
       vatRate: 21,
       delivery: { status: "sent" },
     });
+    expect(result.fiscalSubmissions.at(-1)).toMatchObject({
+      customerInvoiceId: result.customerInvoices.at(-1)?.id,
+      status: "pending",
+      recordReference: expect.stringMatching(/^VF-/),
+    });
   });
 
   it("derives private lesson prices from the teacher category", () => {

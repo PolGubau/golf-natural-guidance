@@ -87,3 +87,34 @@ test("admin can inspect a client's booking history", async ({ page }) => {
   await page.getByLabel("Buscar cliente").fill("");
   await expect(page).toHaveURL(/\/admin\/reservas$/);
 });
+
+test("admin can demonstrate lead automation and fiscal submission", async ({
+  page,
+}) => {
+  await page.goto("/admin");
+  await page.getByLabel("Email").fill(MOCK_ADMIN_CREDENTIALS.email);
+  await page.getByLabel("Contraseña").fill(MOCK_ADMIN_CREDENTIALS.password);
+  await page.getByRole("button", { name: "Entrar al backoffice" }).click();
+
+  await page.getByRole("link", { name: "Captación", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Oportunidades que pueden jugar más" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Preparar seguimiento" })
+    .first()
+    .click();
+
+  await page
+    .getByRole("link", { name: "Automatizaciones", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Seguimientos listos para revisar" }),
+  ).toBeVisible();
+  await expect(page.getByText("Responder a Elena Ruiz")).toBeVisible();
+
+  await page.getByRole("link", { name: "Facturación", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Veri*Factu" })).toBeVisible();
+  await page.getByRole("button", { name: "Simular remisión" }).first().click();
+  await expect(page.getByText("Aceptado")).toBeVisible();
+});

@@ -23,6 +23,14 @@ export type BookingStatus =
 export type PaymentMethod = "online" | "in_person";
 export type PaymentStatus = "pending" | "paid";
 export type MemberType = "arabella_member" | "non_member" | "unknown";
+export type LeadStage =
+  | "new"
+  | "contacted"
+  | "qualified"
+  | "booking_pending"
+  | "booked";
+export type AutomationTaskStatus = "suggested" | "ready" | "completed";
+export type FiscalSubmissionStatus = "pending" | "accepted";
 
 export type AvailabilityRule = {
   weekday: number;
@@ -84,6 +92,29 @@ export type Student = {
   phone?: string;
   fiscalId: string;
   fiscalAddress: string;
+};
+
+export type Lead = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  source: string;
+  interest: string;
+  stage: LeadStage;
+  score: number;
+  nextAction: string;
+  lastContactAt?: string;
+  createdAt: string;
+};
+
+export type AutomationTask = {
+  id: string;
+  leadId: string;
+  title: string;
+  detail: string;
+  status: AutomationTaskStatus;
+  createdAt: string;
 };
 
 export type Booking = {
@@ -168,6 +199,15 @@ export type CustomerInvoice = {
   };
 };
 
+export type FiscalSubmission = {
+  id: string;
+  customerInvoiceId: string;
+  status: FiscalSubmissionStatus;
+  recordReference: string;
+  qrReference: string;
+  submittedAt?: string;
+};
+
 export type DemoSettings = {
   timezone: "Europe/Madrid";
   currency: "EUR";
@@ -187,10 +227,13 @@ export type DemoData = {
   products: Product[];
   activities: Activity[];
   students: Student[];
+  leads: Lead[];
+  automationTasks: AutomationTask[];
   bookings: Booking[];
   payments: MockPayment[];
   compensationLines: CompensationLine[];
   invoices: TeacherInvoice[];
   customerInvoices: CustomerInvoice[];
+  fiscalSubmissions: FiscalSubmission[];
   settings: DemoSettings;
 };

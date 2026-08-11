@@ -1,4 +1,5 @@
 import { createCustomerInvoice } from "~/domain/customer-invoices";
+import { createFiscalSubmission } from "~/domain/fiscal-submissions";
 import type { DemoData } from "~/domain/models";
 import { createSeed } from "~/infrastructure/seed";
 import type {
@@ -14,22 +15,28 @@ const collectionKeys: CollectionKey[] = [
   "products",
   "activities",
   "students",
+  "leads",
+  "automationTasks",
   "bookings",
   "payments",
   "compensationLines",
   "invoices",
   "customerInvoices",
+  "fiscalSubmissions",
 ];
 const storageKeys: Record<keyof DemoData, string> = {
   teachers: "gng-demo:teachers",
   products: "gng-demo:products",
   activities: "gng-demo:activities",
   students: "gng-demo:students",
+  leads: "gng-demo:leads",
+  automationTasks: "gng-demo:automation-tasks",
   bookings: "gng-demo:bookings",
   payments: "gng-demo:payments",
   compensationLines: "gng-demo:compensation-lines",
   invoices: "gng-demo:invoices",
   customerInvoices: "gng-demo:customer-invoices",
+  fiscalSubmissions: "gng-demo:fiscal-submissions",
   settings: "gng-demo:settings",
 };
 
@@ -100,6 +107,11 @@ function migrateInvoiceData(data: DemoData): DemoData {
       fiscalId: student.fiscalId || "Pendiente de configurar",
       fiscalAddress: student.fiscalAddress || "Pendiente de configurar",
     })),
+    fiscalSubmissions: data.fiscalSubmissions.filter((submission) =>
+      data.customerInvoices.some(
+        (invoice) => invoice.id === submission.customerInvoiceId,
+      ),
+    ),
   };
 
   for (const booking of migrated.bookings) {
@@ -123,6 +135,21 @@ function migrateInvoiceData(data: DemoData): DemoData {
     migrated = {
       ...migrated,
       customerInvoices: [...migrated.customerInvoices, invoice],
+    };
+  }
+  for (const invoice of migrated.customerInvoices) {
+    if (
+      migrated.fiscalSubmissions.some(
+        (item) => item.customerInvoiceId === invoice.id,
+      )
+    )
+      continue;
+    migrated = {
+      ...migrated,
+      fiscalSubmissions: [
+        ...migrated.fiscalSubmissions,
+        createFiscalSubmission(invoice),
+      ],
     };
   }
   return migrated;

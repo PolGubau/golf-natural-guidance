@@ -5,10 +5,12 @@ import { useDemo } from "~/infrastructure/state/demo-store";
 import type { AdminSection } from "./admin-shell";
 import { ActivitiesView } from "./views/activities-view";
 import { AgendaView } from "./views/agenda-view";
+import { AutomationsView } from "./views/automations-view";
 import { BillingView } from "./views/billing-view";
 import { BookingsView } from "./views/bookings-view";
 import { ClientsView } from "./views/clients-view";
 import { DashboardView } from "./views/dashboard-view";
+import { LeadsView } from "./views/leads-view";
 import { SettingsView } from "./views/settings-view";
 import { TeachersView } from "./views/teachers-view";
 
@@ -37,6 +39,8 @@ export function AdminSectionView({
       ) : null}
       {section === "agenda" ? <AgendaView data={data} /> : null}
       {section === "clients" ? <ClientsView data={data} /> : null}
+      {section === "leads" ? <LeadsView data={data} /> : null}
+      {section === "automations" ? <AutomationsView data={data} /> : null}
       {section === "teachers" ? <TeachersView data={data} /> : null}
       {section === "activities" ? <ActivitiesView data={data} /> : null}
       {section === "billing" ? <BillingView data={data} /> : null}

@@ -1,14 +1,19 @@
 "use client";
 
 import {
+  CheckCircleIcon as CheckCircle,
   CurrencyCircleDollarIcon as CircleDollarSign,
   DownloadSimpleIcon as Download,
   SealCheckIcon as FileCheck2,
   FileTextIcon as FileText,
+  QrCodeIcon as QrCode,
   ReceiptIcon as ReceiptText,
+  PaperPlaneTiltIcon as Send,
+  ShieldCheckIcon as ShieldCheck,
 } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { simulateFiscalSubmission } from "~/application/fiscal-compliance";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { EmptyState } from "~/components/ui/states";
@@ -22,6 +27,7 @@ export function BillingView({ data }: { data: DemoData }) {
   const { commit } = useDemo();
   const [tab, setTab] = useState<"lines" | "invoices">("lines");
   const [period, setPeriod] = useState(monthKey());
+  const [submittingInvoiceId, setSubmittingInvoiceId] = useState<string>();
   const pending = data.compensationLines.filter(
     (line) => line.status === "pending",
   );
@@ -32,6 +38,11 @@ export function BillingView({ data }: { data: DemoData }) {
   );
   const generate = () =>
     void commit((current) => generateMonthlyInvoices(current, period));
+  const submitFiscalRecord = async (invoiceId: string) => {
+    setSubmittingInvoiceId(invoiceId);
+    await commit((current) => simulateFiscalSubmission(current, invoiceId));
+    setSubmittingInvoiceId(undefined);
+  };
   return (
     <div>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -78,6 +89,11 @@ export function BillingView({ data }: { data: DemoData }) {
           icon={<CircleDollarSign />}
         />
       </div>
+      <FiscalControl
+        data={data}
+        submittingInvoiceId={submittingInvoiceId}
+        onSubmit={(invoiceId) => void submitFiscalRecord(invoiceId)}
+      />
       <section className="mt-5 flex flex-col justify-between gap-4 rounded-[22px] border border-forest/15 bg-forest px-5 py-5 text-white sm:flex-row sm:items-center">
         <div>
           <p className="text-xs font-semibold text-coral">Cierre de {period}</p>
@@ -167,6 +183,113 @@ export function BillingView({ data }: { data: DemoData }) {
       ) : (
         <InvoicesTable data={data} period={period} onExport={exportInvoices} />
       )}
+    </div>
+  );
+}
+
+function FiscalControl({
+  data,
+  submittingInvoiceId,
+  onSubmit,
+}: {
+  data: DemoData;
+  submittingInvoiceId?: string;
+  onSubmit: (invoiceId: string) => void;
+}) {
+  const records = data.customerInvoices
+    .map((invoice) => ({
+      invoice,
+      submission: data.fiscalSubmissions.find(
+        (item) => item.customerInvoiceId === invoice.id,
+      ),
+    }))
+    .sort((a, b) => b.invoice.issuedAt.localeCompare(a.invoice.issuedAt));
+  const accepted = records.filter(
+    (record) => record.submission?.status === "accepted",
+  ).length;
+  return (
+    <section className="surface mt-5 rounded-[22px] p-5">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="grid size-8 place-items-center rounded-lg bg-forest/10 text-forest">
+              <ShieldCheck size={17} />
+            </span>
+            <p className="text-xs font-bold uppercase tracking-[.14em] text-muted">
+              Control fiscal
+            </p>
+          </div>
+          <h3 className="mt-3 text-lg font-semibold">Veri*Factu</h3>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
+            Cada factura genera un registro trazable y queda lista para su
+            remisión. Este entorno representa la integración futura.
+          </p>
+        </div>
+        <Badge tone="info">Simulación de integración</Badge>
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <FiscalMetric label="Registros generados" value={records.length} />
+        <FiscalMetric label="Aceptados" value={accepted} tone="success" />
+        <FiscalMetric
+          label="Pendientes de remisión"
+          value={records.length - accepted}
+          tone="warning"
+        />
+      </div>
+      <div className="mt-5 divide-y divide-line border-t border-line">
+        {records.slice(0, 4).map(({ invoice, submission }) => {
+          const acceptedRecord = submission?.status === "accepted";
+          return (
+            <article
+              key={invoice.id}
+              className="flex flex-col justify-between gap-3 py-4 sm:flex-row sm:items-center"
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl bg-sand text-forest">
+                  <QrCode size={18} />
+                </span>
+                <div>
+                  <strong className="block text-sm">{invoice.number}</strong>
+                  <span className="mt-1 block text-xs text-muted">
+                    {submission?.recordReference ?? "Registro pendiente"}
+                  </span>
+                </div>
+              </div>
+              {acceptedRecord ? (
+                <Badge tone="success">
+                  <CheckCircle className="mr-1" size={13} /> Aceptado
+                </Badge>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={submittingInvoiceId === invoice.id}
+                  onClick={() => onSubmit(invoice.id)}
+                >
+                  <Send size={14} /> Simular remisión
+                </Button>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function FiscalMetric({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "success" | "warning";
+}) {
+  return (
+    <div className="rounded-xl bg-sand/70 p-3">
+      <Badge tone={tone}>{label}</Badge>
+      <strong className="mt-3 block text-2xl tracking-tight">{value}</strong>
     </div>
   );
 }

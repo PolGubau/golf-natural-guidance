@@ -4,6 +4,7 @@ import {
   CurrencyCircleDollarIcon as CircleDollarSign,
   ClockIcon as Clock3,
   GraduationCapIcon as GraduationCap,
+  SparkleIcon as Sparkle,
   UsersThreeIcon as UsersRound,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -58,6 +59,39 @@ export function DashboardView({ data }: { data: DemoData }) {
             value={String(insights.confirmedBookings)}
             note={`${data.students.length} clientes registrados`}
           />
+        </div>
+      </section>
+      <section className="grid gap-4 rounded-[24px] border border-forest/15 bg-forest p-5 text-white xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+        <div className="flex gap-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/12 text-coral">
+            <Sparkle size={21} />
+          </span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.14em] text-coral">
+              Plataforma conectada
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">
+              Capta, acompaña y convierte más jugadores
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-white/70">
+              El asistente prepara seguimientos, el pipeline prioriza
+              oportunidades y la facturación mantiene el registro listo.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 xl:justify-end">
+          <Link
+            href="/admin/captacion"
+            className="inline-flex min-h-9 items-center rounded-lg bg-white px-3 text-xs font-semibold text-forest"
+          >
+            Ver captación
+          </Link>
+          <Link
+            href="/admin/automatizaciones"
+            className="inline-flex min-h-9 items-center rounded-lg border border-white/20 px-3 text-xs font-semibold text-white"
+          >
+            Abrir asistente
+          </Link>
         </div>
       </section>
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(290px,.75fr)]">

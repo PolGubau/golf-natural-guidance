@@ -1,4 +1,5 @@
 import { createCustomerInvoice } from "~/domain/customer-invoices";
+import { createFiscalSubmission } from "~/domain/fiscal-submissions";
 import type { DemoData, Teacher } from "~/domain/models";
 import { publicTeacherAssets } from "~/infrastructure/teacher-assets";
 import { addDays, localDateKey } from "~/lib/dates";
@@ -177,6 +178,75 @@ export function createSeed(): DemoData {
         fiscalAddress: "C/ del Mar, 24 · 07015 Palma de Mallorca",
       },
     ],
+    leads: [
+      {
+        id: "lead-elena",
+        name: "Elena Ruiz",
+        email: "elena.ruiz@example.com",
+        phone: "+34 622 416 802",
+        source: "Formulario web",
+        interest: "Clase privada de iniciación",
+        stage: "new",
+        score: 92,
+        nextAction: "Enviar propuesta de primera clase",
+        createdAt: at(-1, "11:20"),
+      },
+      {
+        id: "lead-daniel",
+        name: "Daniel Weber",
+        email: "daniel.weber@example.com",
+        source: "Google Maps",
+        interest: "Bono de clases",
+        stage: "qualified",
+        score: 81,
+        nextAction: "Compartir horarios con Toni",
+        lastContactAt: at(-1, "16:10"),
+        createdAt: at(-4, "10:30"),
+      },
+      {
+        id: "lead-clara",
+        name: "Clara Vidal",
+        email: "clara.vidal@example.com",
+        phone: "+34 651 901 244",
+        source: "Instagram",
+        interest: "Junior Academy",
+        stage: "booking_pending",
+        score: 74,
+        nextAction: "Recordar la reserva de prueba",
+        lastContactAt: at(-2, "18:00"),
+        createdAt: at(-8, "12:00"),
+      },
+      {
+        id: "lead-jaime",
+        name: "Jaime Torres",
+        email: "jaime.torres@example.com",
+        source: "Recomendación",
+        interest: "Swing Lab",
+        stage: "booked",
+        score: 98,
+        nextAction: "Dar la bienvenida tras su primera reserva",
+        lastContactAt: at(-1, "09:15"),
+        createdAt: at(-12, "17:40"),
+      },
+    ],
+    automationTasks: [
+      {
+        id: "automation-seed-elena",
+        leadId: "lead-elena",
+        title: "Responder a Elena Ruiz",
+        detail: "Borrador con enlace a una clase de iniciación.",
+        status: "suggested",
+        createdAt: at(-1, "11:21"),
+      },
+      {
+        id: "automation-seed-clara",
+        leadId: "lead-clara",
+        title: "Recordatorio para Clara Vidal",
+        detail: "Seguimiento de la plaza de prueba en Junior Academy.",
+        status: "ready",
+        createdAt: at(-1, "18:05"),
+      },
+    ],
     bookings: [
       {
         id: "booking-seed-private",
@@ -259,6 +329,7 @@ export function createSeed(): DemoData {
     ],
     invoices: [],
     customerInvoices: [],
+    fiscalSubmissions: [],
     settings: {
       timezone: "Europe/Madrid",
       currency: "EUR",
@@ -274,26 +345,24 @@ export function createSeed(): DemoData {
       },
     },
   };
+  const customerInvoices = data.bookings.flatMap((booking) => {
+    const teacher = data.teachers.find((item) => item.id === booking.teacherId);
+    const student = data.students.find((item) => item.id === booking.studentId);
+    if (!teacher || !student) return [];
+    return [
+      createCustomerInvoice(
+        data,
+        booking,
+        student,
+        teacher,
+        data.activities.find((item) => item.id === booking.activityId),
+        booking.createdAt,
+      ),
+    ];
+  });
   return {
     ...data,
-    customerInvoices: data.bookings.flatMap((booking) => {
-      const teacher = data.teachers.find(
-        (item) => item.id === booking.teacherId,
-      );
-      const student = data.students.find(
-        (item) => item.id === booking.studentId,
-      );
-      if (!teacher || !student) return [];
-      return [
-        createCustomerInvoice(
-          data,
-          booking,
-          student,
-          teacher,
-          data.activities.find((item) => item.id === booking.activityId),
-          booking.createdAt,
-        ),
-      ];
-    }),
+    customerInvoices,
+    fiscalSubmissions: customerInvoices.map(createFiscalSubmission),
   };
 }

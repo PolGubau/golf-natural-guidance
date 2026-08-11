@@ -5,11 +5,13 @@ import {
   CalendarDotsIcon as CalendarDays,
   CalendarBlankIcon as CalendarRange,
   CurrencyCircleDollarIcon as CircleDollarSign,
+  FunnelIcon as Funnel,
   GraduationCapIcon as GraduationCap,
   SquaresFourIcon as LayoutDashboard,
   SignOutIcon as LogOut,
   ListIcon as Menu,
   SlidersHorizontalIcon as Settings2,
+  SparkleIcon as Sparkle,
   UsersThreeIcon as UsersRound,
   XIcon as X,
 } from "@phosphor-icons/react";
@@ -27,6 +29,8 @@ export type AdminSection =
   | "bookings"
   | "agenda"
   | "clients"
+  | "leads"
+  | "automations"
   | "teachers"
   | "activities"
   | "billing"
@@ -45,6 +49,18 @@ const navigation = [
     label: "Clientes",
     href: "/admin/clientes",
     icon: UsersRound,
+  },
+  {
+    id: "leads",
+    label: "Captación",
+    href: "/admin/captacion",
+    icon: Funnel,
+  },
+  {
+    id: "automations",
+    label: "Automatizaciones",
+    href: "/admin/automatizaciones",
+    icon: Sparkle,
   },
   {
     id: "teachers",

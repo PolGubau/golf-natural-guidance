@@ -6,6 +6,7 @@ import {
   resolveCustomerPrice,
 } from "~/domain/booking";
 import { createCustomerInvoice } from "~/domain/customer-invoices";
+import { createFiscalSubmission } from "~/domain/fiscal-submissions";
 import type { Booking, DemoData, MockPayment, Student } from "~/domain/models";
 import { customerSchema } from "~/domain/schemas";
 
@@ -111,6 +112,10 @@ export function createBooking(
     bookings: [...data.bookings, booking],
     payments: [...data.payments, payment],
     customerInvoices: [...data.customerInvoices, customerInvoice],
+    fiscalSubmissions: [
+      ...data.fiscalSubmissions,
+      createFiscalSubmission(customerInvoice),
+    ],
     compensationLines: [
       ...data.compensationLines,
       createCompensationLine(booking),
