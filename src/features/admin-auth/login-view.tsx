@@ -5,7 +5,6 @@ import {
   LockKeyIcon as LockKeyhole,
   ShieldCheckIcon as ShieldCheck,
 } from "@phosphor-icons/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -99,15 +98,7 @@ export function LoginView({ action }: { action: LoginAction }) {
         </Link>
       </section>
       <aside className="relative hidden overflow-hidden bg-forest lg:block">
-        <Image
-          src="/teachers/toni-planells.webp"
-          alt="Toni Planells en el campo de golf"
-          fill
-          priority
-          className="object-cover opacity-75"
-          sizes="60vw"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(24,62,50,.15),rgba(24,62,50,.9))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(255,255,255,.14),transparent_28%),linear-gradient(135deg,#183e32,#0b211b)]" />
         <div className="absolute inset-x-12 bottom-12 max-w-xl text-white">
           <p className="text-xs font-bold uppercase tracking-[.18em] text-white/55">
             Golf Natural Guidance

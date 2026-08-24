@@ -401,7 +401,7 @@ export function ServiceStep({ data, draft, onChange }: Props) {
                     })
                   }
                   activity={activity}
-                  teacherName={teacher?.name ?? "Equipo GNG"}
+                  teacherName={teacher?.name ?? "Equipo de la academia"}
                   places={places}
                 />
               );

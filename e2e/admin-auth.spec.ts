@@ -20,7 +20,7 @@ test("admin is private by default and supports login and logout", async ({
   await page.getByLabel("Contraseña").fill(MOCK_ADMIN_CREDENTIALS.password);
   await page.getByRole("button", { name: "Entrar al backoffice" }).click();
   await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
-  await expect(page.getByText("Toni Planells")).toBeVisible();
+  await expect(page.getByText("Administrador Demo")).toBeVisible();
 
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
   await expect(

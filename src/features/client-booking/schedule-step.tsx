@@ -69,7 +69,7 @@ export function ScheduleStep({
               </span>
               <span className="flex items-center gap-3">
                 <MapPin className="text-coral" />
-                Golf Son Muntaner
+                Campo de golf de ejemplo
               </span>
               <span className="flex items-center gap-3">
                 <Check className="text-coral" />

@@ -23,10 +23,7 @@ export function Brand({
         width={42}
         height={42}
         priority
-        className={cn(
-          "size-10 rounded-xl object-contain",
-          light ? "bg-white" : "bg-white",
-        )}
+        className="size-10 rounded-xl bg-white object-contain"
       />
       {compact ? null : (
         <span>

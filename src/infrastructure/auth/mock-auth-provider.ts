@@ -8,13 +8,13 @@ import type {
 import { InvalidCredentialsError } from "./auth-provider";
 
 export const MOCK_ADMIN_CREDENTIALS = {
-  email: "toni.planells@golfnaturalguidance.demo",
-  password: "GNG-Toni-Demo-2026!",
+  email: "demo@academia-demo.example",
+  password: "Demo-Academia-2026!",
 } as const;
 
-const TONI_PROFILE: AdminUser = {
-  id: "admin-toni-planells",
-  name: "Toni Planells",
+const DEMO_PROFILE: AdminUser = {
+  id: "admin-demo",
+  name: "Administrador Demo",
   email: MOCK_ADMIN_CREDENTIALS.email,
   role: "admin",
 };
@@ -50,8 +50,8 @@ export class MockAuthProvider implements AuthProvider {
 
     const expiresAt = new Date(this.now() + this.sessionDurationMs);
     const payload: TokenPayload = {
-      sub: TONI_PROFILE.id,
-      role: TONI_PROFILE.role,
+      sub: DEMO_PROFILE.id,
+      role: DEMO_PROFILE.role,
       exp: expiresAt.getTime(),
     };
     const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
@@ -60,7 +60,7 @@ export class MockAuthProvider implements AuthProvider {
     return {
       accessToken: `${encodedPayload}.${this.sign(encodedPayload)}`,
       expiresAt,
-      user: TONI_PROFILE,
+      user: DEMO_PROFILE,
     };
   }
 
@@ -75,7 +75,7 @@ export class MockAuthProvider implements AuthProvider {
         Buffer.from(encodedPayload, "base64url").toString(),
       ) as TokenPayload;
       if (
-        payload.sub !== TONI_PROFILE.id ||
+        payload.sub !== DEMO_PROFILE.id ||
         payload.role !== "admin" ||
         payload.exp <= this.now()
       )
@@ -83,7 +83,7 @@ export class MockAuthProvider implements AuthProvider {
       return {
         accessToken,
         expiresAt: new Date(payload.exp),
-        user: TONI_PROFILE,
+        user: DEMO_PROFILE,
       };
     } catch {
       return null;

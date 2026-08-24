@@ -558,7 +558,7 @@ function exportInvoices(data: DemoData, invoices: TeacherInvoice[]) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "liquidaciones-gng.csv";
+  link.download = "liquidaciones-demo.csv";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -596,7 +596,7 @@ function exportPendingLines(
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `liquidaciones-gng-${period}.csv`;
+  link.download = `liquidaciones-demo-${period}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }

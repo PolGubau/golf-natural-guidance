@@ -85,7 +85,7 @@ export function BookingSummary({
         <SummaryRow
           icon={<MapPin weight="duotone" />}
           label="Lugar"
-          value="Golf Son Muntaner"
+          value="Campo de golf de ejemplo"
         />
         <div className="border-t border-line pt-4">
           <div className="flex items-end justify-between">

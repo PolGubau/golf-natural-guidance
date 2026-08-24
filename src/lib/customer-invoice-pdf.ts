@@ -38,7 +38,7 @@ export function buildCustomerInvoicePdf(
       `<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter [/ASCIIHexDecode /DCTDecode] /Length ${logo.bytes.length * 2 + 1} >>\nstream\n${toHex(logo.bytes)}>\nendstream`,
     );
   }
-  const header = `%PDF-1.4\n% GNG invoice\n%% FACTURA ${pdfText(invoice.number)}\n%% TOTAL: ${formatAmount(invoice.total)}\n`;
+  const header = `%PDF-1.4\n% Demo invoice\n%% FACTURA ${pdfText(invoice.number)}\n%% TOTAL: ${formatAmount(invoice.total)}\n`;
   let pdf = header;
   const offsets: number[] = [];
 
@@ -172,21 +172,13 @@ function buildInvoicePage(invoice: CustomerInvoice, hasLogo: boolean) {
     "F1",
     muted,
   );
-  addText(
-    commands,
-    "Gracias por confiar en Natural Guidance.",
-    46,
-    344,
-    9,
-    "F1",
-    muted,
-  );
+  addText(commands, "Gracias por utilizar esta demo.", 46, 344, 9, "F1", muted);
 
   commands.push(`${lightLine} RG 46 166 m 549 166 l S`);
   addText(commands, "INFORMACION", 46, 142, 8, "F2", coral);
   addText(
     commands,
-    "Documento generado desde la demo local de Golf Natural Guidance.",
+    "Documento generado desde la demo de Golf Natural Guidance.",
     46,
     124,
     8,
@@ -202,7 +194,7 @@ function buildInvoicePage(invoice: CustomerInvoice, hasLogo: boolean) {
     "F1",
     muted,
   );
-  addText(commands, "golfnaturalguidance.com", 46, 72, 9, "F2", forest);
+  addText(commands, "academia-demo.example", 46, 72, 9, "F2", forest);
   addText(commands, "Documento de pago · EUR", 430, 72, 8, "F1", muted);
   commands.push("q", `${coral} rg 46 58 32 3 re f`, "Q");
   return commands.join("\n");

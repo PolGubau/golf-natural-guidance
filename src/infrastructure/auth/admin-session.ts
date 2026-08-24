@@ -4,9 +4,9 @@ import { cookies } from "next/headers";
 import type { AuthCredentials } from "./auth-provider";
 import { MockAuthProvider } from "./mock-auth-provider";
 
-const COOKIE_NAME = "gng-admin-session";
+const COOKIE_NAME = "demo-admin-session";
 const provider = new MockAuthProvider(
-  process.env.GNG_AUTH_SECRET ?? "gng-local-demo-auth-secret-v1",
+  process.env.DEMO_AUTH_SECRET ?? "demo-local-auth-secret-v1",
 );
 
 export async function createAdminSession(credentials: AuthCredentials) {

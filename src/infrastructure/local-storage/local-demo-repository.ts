@@ -25,19 +25,19 @@ const collectionKeys: CollectionKey[] = [
   "fiscalSubmissions",
 ];
 const storageKeys: Record<keyof DemoData, string> = {
-  teachers: "gng-demo:teachers",
-  products: "gng-demo:products",
-  activities: "gng-demo:activities",
-  students: "gng-demo:students",
-  leads: "gng-demo:leads",
-  automationTasks: "gng-demo:automation-tasks",
-  bookings: "gng-demo:bookings",
-  payments: "gng-demo:payments",
-  compensationLines: "gng-demo:compensation-lines",
-  invoices: "gng-demo:invoices",
-  customerInvoices: "gng-demo:customer-invoices",
-  fiscalSubmissions: "gng-demo:fiscal-submissions",
-  settings: "gng-demo:settings",
+  teachers: "demo:teachers",
+  products: "demo:products",
+  activities: "demo:activities",
+  students: "demo:students",
+  leads: "demo:leads",
+  automationTasks: "demo:automation-tasks",
+  bookings: "demo:bookings",
+  payments: "demo:payments",
+  compensationLines: "demo:compensation-lines",
+  invoices: "demo:invoices",
+  customerInvoices: "demo:customer-invoices",
+  fiscalSubmissions: "demo:fiscal-submissions",
+  settings: "demo:settings",
 };
 
 export class LocalStorageDemoRepository implements DemoRepository {
@@ -100,7 +100,8 @@ function migrateInvoiceData(data: DemoData): DemoData {
       fiscalName: teacher.fiscalName || teacher.name,
       fiscalId: teacher.fiscalId || "Pendiente de configurar",
       fiscalAddress: teacher.fiscalAddress || "Pendiente de configurar",
-      invoiceSeries: teacher.invoiceSeries || `GNG-${teacher.id.toUpperCase()}`,
+      invoiceSeries:
+        teacher.invoiceSeries || `DEMO-${teacher.id.toUpperCase()}`,
     })),
     students: data.students.map((student) => ({
       ...student,

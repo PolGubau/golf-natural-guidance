@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { MOCK_ADMIN_CREDENTIALS } from "../src/infrastructure/auth/mock-auth-provider";
 
-async function loginAsToni(page: import("@playwright/test").Page) {
+async function loginAsDemo(page: import("@playwright/test").Page) {
   await expect(
     page.getByRole("heading", { name: "Bienvenido de nuevo" }),
   ).toBeVisible();
@@ -19,10 +19,10 @@ test("mobile selection reveals its configuration and the next step", async ({
   await page
     .getByRole("button", { name: /Tengo un profesor en mente/ })
     .click();
-  await page.getByRole("button", { name: /Toni Planells/ }).click();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Clase con Toni Planells" }),
+    page.getByRole("heading", { name: "Clase con Alex Rivera" }),
   ).toBeInViewport();
   await page.getByRole("button", { name: "Continuar" }).click();
   await expect(
@@ -50,7 +50,7 @@ test("a new client can search by time before choosing a teacher", async ({
   await expect(
     page.getByRole("heading", { name: "Elige tu profesor" }),
   ).toBeInViewport();
-  await page.getByRole("button", { name: /Nico Loprete/ }).click();
+  await page.getByRole("button", { name: /Marina Costa/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
 
   await expect(
@@ -64,9 +64,9 @@ test("offers another teacher when the selected one has no availability", async (
   page,
 }) => {
   await page.goto("/booking");
-  await page.waitForFunction(() => localStorage.getItem("gng-demo:teachers"));
+  await page.waitForFunction(() => localStorage.getItem("demo:teachers"));
   await page.evaluate(() => {
-    const key = "gng-demo:teachers";
+    const key = "demo:teachers";
     const store = JSON.parse(localStorage.getItem(key) ?? "null");
     const toni = store?.data?.find(
       (teacher: { id: string }) => teacher.id === "teacher-toni",
@@ -78,19 +78,19 @@ test("offers another teacher when the selected one has no availability", async (
   await page
     .getByRole("button", { name: /Tengo un profesor en mente/ })
     .click();
-  await page.getByRole("button", { name: /Toni Planells/ }).click();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: /^lunes/ }).click();
 
   await expect(
-    page.getByText("Toni Planells no tiene disponibilidad este día."),
+    page.getByText("Alex Rivera no tiene disponibilidad este día."),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
       name: "Otros profesores disponibles este día",
     }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Nico Loprete.*Cambiar/ }).click();
+  await page.getByRole("button", { name: /Marina Costa.*Cambiar/ }).click();
   await expect(page.getByRole("button", { name: /^08:00$/ })).toBeVisible();
 });
 
@@ -101,7 +101,7 @@ test("a returning client skips access and receives saved details", async ({
   await page
     .getByRole("button", { name: /Tengo un profesor en mente/ })
     .click();
-  await page.getByRole("button", { name: /Toni Planells/ }).click();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page
     .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
@@ -128,7 +128,7 @@ test("a returning client skips access and receives saved details", async ({
   await page
     .getByRole("button", { name: /Tengo un profesor en mente/ })
     .click();
-  await page.getByRole("button", { name: /Toni Planells/ }).click();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page
     .getByRole("button", { name: /^(lun|mar|mié|jue|vie|sáb)/ })
@@ -150,7 +150,7 @@ test("private lesson appears in the backoffice", async ({ page }) => {
   await page
     .getByRole("button", { name: /Tengo un profesor en mente/ })
     .click();
-  await page.getByRole("button", { name: /Toni Planells/ }).click();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
 
   const weekday = page
@@ -177,7 +177,7 @@ test("private lesson appears in the backoffice", async ({ page }) => {
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
-  await loginAsToni(page);
+  await loginAsDemo(page);
   await page.getByRole("link", { name: "Reservas", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/reservas$/);
   const clientRow = page
@@ -212,7 +212,7 @@ test("group activity only offers online payment and consumes a place", async ({
     page.getByRole("heading", { name: "Nos vemos en el campo" }),
   ).toBeVisible();
   await page.getByRole("link", { name: /Ver en backoffice/ }).click();
-  await loginAsToni(page);
+  await loginAsDemo(page);
   await page
     .getByRole("link", { name: "Cursos y actividades", exact: true })
     .click();

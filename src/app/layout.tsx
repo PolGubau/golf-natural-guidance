@@ -13,11 +13,21 @@ export const metadata: Metadata = {
     default: "Golf Natural Guidance",
     template: "%s · Golf Natural Guidance",
   },
-  description: "Reservas y gestión de Golf Natural Guidance.",
-  icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+  description:
+    "Demo de una plataforma digital de reservas, agenda, clientes, cobros y facturación desarrollada para Golf Natural Guidance.",
+  keywords: [
+    "producto digital",
+    "software para academias",
+    "reservas online",
+    "caso de estudio",
+    "experiencia de usuario",
+  ],
+  openGraph: {
+    title: "Golf Natural Guidance",
+    description:
+      "Una plataforma digital para simplificar reservas y gestión de academias de golf.",
+    type: "website",
+    locale: "es_ES",
   },
 };
 

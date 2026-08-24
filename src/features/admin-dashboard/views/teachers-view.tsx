@@ -243,7 +243,7 @@ function TeacherDialog({
           fiscalName: "",
           fiscalId: "",
           fiscalAddress: "",
-          invoiceSeries: "GNG-NUEVO",
+          invoiceSeries: "DEMO-NUEVO",
           publicRole: "Profesor",
           category: "teacher",
           active: true,

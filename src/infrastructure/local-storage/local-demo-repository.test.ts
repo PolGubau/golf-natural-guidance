@@ -13,13 +13,12 @@ describe("LocalStorageDemoRepository", () => {
     const second = await repository.load();
     expect(second.data.teachers[0].name).toBe("Nombre editado");
     expect(
-      JSON.parse(window.localStorage.getItem("gng-demo:teachers") ?? "{}")
-        .version,
+      JSON.parse(window.localStorage.getItem("demo:teachers") ?? "{}").version,
     ).toBe(1);
   });
 
   it("recovers safely from corrupt JSON", async () => {
-    window.localStorage.setItem("gng-demo:bookings", "not-json");
+    window.localStorage.setItem("demo:bookings", "not-json");
     const result = await new LocalStorageDemoRepository().load();
     expect(result.recovered).toBe(true);
     expect(result.data.bookings.length).toBeGreaterThan(0);

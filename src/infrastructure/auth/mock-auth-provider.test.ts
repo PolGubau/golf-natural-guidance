@@ -3,12 +3,12 @@ import { InvalidCredentialsError } from "./auth-provider";
 import { MOCK_ADMIN_CREDENTIALS, MockAuthProvider } from "./mock-auth-provider";
 
 describe("MockAuthProvider", () => {
-  it("authenticates Toni and verifies the signed session", async () => {
+  it("authenticates the demo administrator and verifies the signed session", async () => {
     const provider = new MockAuthProvider("test-secret");
     const session = await provider.signIn(MOCK_ADMIN_CREDENTIALS);
 
     expect(session.user).toMatchObject({
-      name: "Toni Planells",
+      name: "Administrador Demo",
       role: "admin",
     });
     await expect(provider.verifySession(session.accessToken)).resolves.toEqual(

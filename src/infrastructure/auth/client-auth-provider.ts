@@ -13,7 +13,7 @@ export interface ClientAuthProvider {
   signOut(): Promise<void>;
 }
 
-const STORAGE_KEY = "gng-client-session-v1";
+const STORAGE_KEY = "demo-client-session-v1";
 
 export const MOCK_GOOGLE_CLIENT: ClientUser = {
   id: "google-lucia",
